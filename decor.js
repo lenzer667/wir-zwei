@@ -125,7 +125,7 @@ const TIMM_SVG = `
 </g>`;
 
 function coupleSVG(cls = '') {
-  return sideCouple(cls);
+  return frontCouple(cls);
 }
 
 const CATS = {

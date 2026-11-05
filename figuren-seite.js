@@ -1,3 +1,40 @@
+// Von vorne fürs Startbild und den Match-Jubel: Beide schauen zur Kamera und halten sich an der Hand.
+const FRONT_PARTS = {
+  fenja: {
+    body: [150, 20, 500, 650], 'arm-l': [40, 380, 250, 90], 'arm-r': [550, 380, 210, 90],
+    'leg-l': [250, 612, 168, 410], 'leg-r': [418, 612, 175, 410],
+    pivots: { 'arm-l': [281, 424], 'arm-r': [558, 424] },
+  },
+  timm: {
+    body: [915, 0, 380, 674], 'arm-l': [790, 370, 250, 115], 'arm-r': [1190, 370, 250, 115],
+    'leg-l': [960, 612, 155, 410], 'leg-r': [1115, 612, 165, 410],
+    pivots: { 'arm-l': [1032, 400], 'arm-r': [1198, 400] },
+  },
+};
+
+function frontImage(who, part) {
+  const [x, y, w, h] = FRONT_PARTS[who][part];
+  return `<image href="assets/figuren/${who}-${part}.png" x="${x}" y="${y}" width="${w}" height="${h}"/>`;
+}
+
+function frontFigure(who, armL, armR) {
+  const arm = (part, rot) => {
+    const [px, py] = FRONT_PARTS[who].pivots[part];
+    return `<g class="sp-part" style="--r:${rot}deg;transform-origin:${px}px ${py}px">${frontImage(who, part)}</g>`;
+  };
+  return `<g class="sp-bob">${frontImage(who, 'leg-l')}${frontImage(who, 'leg-r')}${frontImage(who, 'body')}${arm('arm-l', armL)}${arm('arm-r', armR)}</g>`;
+}
+
+function frontCouple(cls = '') {
+  return `<svg class="couple sprite-couple ${cls}" viewBox="130 -10 1030 1040" aria-hidden="true">
+    <ellipse cx="420" cy="1012" rx="170" ry="16" fill="#000" opacity=".22"/>
+    <ellipse cx="925" cy="1012" rx="170" ry="16" fill="#000" opacity=".22"/>
+    ${frontFigure('fenja', -68, 44)}
+    <g transform="translate(-190 0)">${frontFigure('timm', -38, 68)}</g>
+    <path class="clasp" d="M672 520C650 485 605 500 618 542C624 565 650 585 672 602C694 585 720 565 726 542C739 500 694 485 672 520Z" fill="#ff5f82"/>
+  </svg>`;
+}
+
 // Timm und Fenja von der Seite. Alle Teile liegen in den Koordinaten des Originalbilds.
 const SIDE_PARTS = {
   fenja: {

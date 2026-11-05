@@ -1,5 +1,5 @@
 // Netzwerk zuerst, damit Updates sofort ankommen. Ohne Internet startet die App aus dem Cache.
-const CACHE = 'wirzwei-v14';
+const CACHE = 'wirzwei-v15';
 const SHELL = ['./', 'index.html', 'styles.css', 'data.js', 'store.js', 'figuren-seite.js', 'decor.js', 'game.js', 'app.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'assets/herbst.jpg'];
 
 self.addEventListener('install', (e) => {
