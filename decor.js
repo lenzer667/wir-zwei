@@ -3,54 +3,74 @@
 // ---------- Figuren ----------
 const SKIN = '#f9d7bb';
 
-// Lange, wellige Haare nach eurem Bild
+// Fenja: lange Locken, dunkelbraun mit rötlichem Schimmer, grau-blaue Augen, Sommersprossen
 const FENJA_BACK_HAIR = `
-    <path d="M50 3C25 2 13 19 14 39C14 50 7 58 9 71C11 83 18 92 30 95C28 88 30 82 33 78H67C70 82 72 88 70 95C82 92 89 83 91 71C93 58 86 50 86 39C87 19 75 2 50 3Z" fill="#6b4126"/>
-    <path d="M17 44C14 56 12 66 17 78C19 84 23 88 27 90M83 44C86 56 88 66 83 78C81 84 77 88 73 90" stroke="#8d5a33" stroke-width="3" stroke-linecap="round" fill="none"/>
-    <path d="M23 50C20 60 19 70 23 80M77 50C80 60 81 70 77 80" stroke="#a9733f" stroke-width="2" stroke-linecap="round" fill="none"/>`;
+    <path d="M50 3C30 1 15 14 13 32Q5 38 9 46Q3 54 8 62Q2 71 9 78Q6 87 15 90Q18 98 28 95Q34 92 33 80H67Q66 92 72 95Q82 98 85 90Q94 87 91 78Q98 71 92 62Q97 54 91 46Q95 38 87 32C85 14 70 1 50 3Z" fill="#54291a"/>
+    <path d="M13 46Q19 50 14 55Q9 60 15 64Q20 68 15 73Q11 78 17 82M21 58Q26 62 22 67Q18 72 23 76Q27 80 24 86" stroke="#7a3a1e" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <path d="M87 46Q81 50 86 55Q91 60 85 64Q80 68 85 73Q89 78 83 82M79 58Q74 62 78 67Q82 72 77 76Q73 80 76 86" stroke="#a84f22" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <path d="M91 58Q86 63 90 68Q94 73 89 78M75 70Q71 75 74 80" stroke="#cf6d30" stroke-width="2" stroke-linecap="round" fill="none"/>`;
 
-const FENJA_HEAD = `
-    <path d="M23 36C23 16 77 16 77 36C77 53 62 65 50 65C38 65 23 53 23 36Z" fill="#fbdcc4"/>
-    <path d="M50 8C33 6 18 19 19 42C24 31 33 25 45 21C48 18 50 13 50 8Z" fill="#7c4c2b"/>
-    <path d="M50 8C67 6 82 19 81 42C76 31 67 24 56 21C53 18 51 13 50 8Z" fill="#744628"/>
-    <path d="M32 16C38 12 43 11 47 12M59 13C65 13 71 17 74 22" stroke="#a9733f" stroke-width="2.4" stroke-linecap="round" fill="none"/>
-    <path d="M21 38C17 46 22 52 19 60C18 64 20 67 23 69M79 38C83 46 78 52 81 60C82 64 80 67 77 69" stroke="#7c4c2b" stroke-width="6" stroke-linecap="round" fill="none"/>
-    <path d="M31 31Q37 28 43 30M57 30Q63 28 69 31" stroke="#5c3a24" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-    <ellipse cx="33" cy="50" rx="5" ry="3" fill="#ff9fae" opacity=".55"/><ellipse cx="67" cy="50" rx="5" ry="3" fill="#ff9fae" opacity=".55"/>
+const FENJA_FACE = `
+    <path d="M23 36C23 16 77 16 77 36C77 53 62 65 50 65C38 65 23 53 23 36Z" fill="#fbdfca"/>
+    <path d="M30 30Q37 26 44 29M56 29Q63 26 70 30" stroke="#5c3320" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+    <ellipse cx="32" cy="50" rx="5" ry="3" fill="#ff9fae" opacity=".5"/><ellipse cx="68" cy="50" rx="5" ry="3" fill="#ff9fae" opacity=".5"/>
+    <g fill="#c98a66" opacity=".75"><circle cx="35" cy="47" r=".7"/><circle cx="39" cy="50" r=".7"/><circle cx="43" cy="48" r=".6"/><circle cx="46" cy="50.500" r=".6"/><circle cx="54" cy="50.500" r=".6"/><circle cx="57" cy="48" r=".6"/><circle cx="61" cy="50" r=".7"/><circle cx="65" cy="47" r=".7"/></g>
     <g class="eyes">
-      <ellipse cx="38" cy="42" rx="8" ry="9.6" fill="#fff"/><ellipse cx="62" cy="42" rx="8" ry="9.6" fill="#fff"/>
-      <ellipse cx="38.5" cy="42.5" rx="6.6" ry="8.6" fill="#2f6fc0"/><ellipse cx="61.5" cy="42.5" rx="6.6" ry="8.6" fill="#2f6fc0"/>
-      <ellipse cx="38.5" cy="46" rx="5" ry="4.6" fill="#7cc0f2"/><ellipse cx="61.5" cy="46" rx="5" ry="4.6" fill="#7cc0f2"/>
-      <circle cx="38.5" cy="42" r="3.6" fill="#16233f"/><circle cx="61.5" cy="42" r="3.6" fill="#16233f"/>
-      <circle cx="35.6" cy="38.4" r="2.8" fill="#fff"/><circle cx="58.6" cy="38.4" r="2.8" fill="#fff"/>
-      <circle cx="41.4" cy="46.6" r="1.3" fill="#fff"/><circle cx="64.4" cy="46.6" r="1.3" fill="#fff"/>
-      <path d="M28 40C30 33 44 30 47 36M72 40C70 33 56 30 53 36" stroke="#2b1a17" stroke-width="2.8" stroke-linecap="round" fill="none"/>
-      <path d="M28 40L25.500 38M72 40L74.500 38" stroke="#2b1a17" stroke-width="1.4" stroke-linecap="round"/>
+      <ellipse cx="38" cy="40" rx="7.400" ry="8.600" fill="#fff"/><ellipse cx="62" cy="40" rx="7.400" ry="8.600" fill="#fff"/>
+      <ellipse cx="38.500" cy="40.500" rx="6" ry="7.600" fill="#4f7490"/><ellipse cx="61.500" cy="40.500" rx="6" ry="7.600" fill="#4f7490"/>
+      <ellipse cx="38.500" cy="44" rx="4.400" ry="3.800" fill="#9dbfd4"/><ellipse cx="61.500" cy="44" rx="4.400" ry="3.800" fill="#9dbfd4"/>
+      <circle cx="38.500" cy="40" r="3.200" fill="#1a2632"/><circle cx="61.500" cy="40" r="3.200" fill="#1a2632"/>
+      <circle cx="36" cy="36.800" r="2.400" fill="#fff"/><circle cx="59" cy="36.800" r="2.400" fill="#fff"/>
+      <circle cx="41" cy="44" r="1.100" fill="#fff"/><circle cx="64" cy="44" r="1.100" fill="#fff"/>
+      <path d="M29 38C31 31 44 29 46 35M71 38C69 31 56 29 54 35" stroke="#2b1a17" stroke-width="2.500" stroke-linecap="round" fill="none"/>
+      <path d="M29 38L26.500 36M71 38L73.500 36" stroke="#2b1a17" stroke-width="1.400" stroke-linecap="round"/>
     </g>
-    <path d="M49.300 51.500Q50 52.500 50.700 51.500" stroke="#d99a86" stroke-width="1.3" stroke-linecap="round" fill="none"/>
-    <path d="M43.500 54.500Q50 56.500 56.500 54.500Q55 62 50 62Q45 62 43.500 54.500Z" fill="#c8475c"/>
-    <path d="M44.800 55Q50 56.400 55.200 55L54.700 56.800Q50 57.900 45.300 56.800Z" fill="#fff"/>`;
+    <path d="M49 50.500Q50 51.800 51 50.500" stroke="#d99a86" stroke-width="1.300" stroke-linecap="round" fill="none"/>
+    <path d="M43 55.500Q47 54 50 55.200Q53 54 57 55.500Q50 61.500 43 55.500Z" fill="#d9626f"/>
+    <path d="M43 55.500Q50 57.500 57 55.500" stroke="#a83f50" stroke-width="1" stroke-linecap="round" fill="none"/>`;
 
-// Dunkles, zerzaustes Haar mit viel Volumen, dicke schwarze Brille, leichter Bart
+// Seitenscheitel, die Stirn bleibt frei
+const FENJA_TOP = `
+    <path d="M60 6C38 2 19 15 18 42C23 29 36 19 60 14Z" fill="#5f2f1c"/>
+    <path d="M60 6C74 7 83 21 82 42C78 29 70 18 60 14Z" fill="#6e3720"/>
+    <path d="M30 18C37 11 46 9 54 10M66 11C72 14 76 20 78 27" stroke="#a84f22" stroke-width="2.400" stroke-linecap="round" fill="none"/>`;
+
+const FENJA_LOCKS = `
+    <path d="M21 34Q15 40 20 46Q24 52 19 58Q15 64 21 70" stroke="#5f2f1c" stroke-width="5.500" stroke-linecap="round" fill="none"/>
+    <path d="M79 34Q85 40 80 46Q76 52 81 58Q85 64 79 70" stroke="#a84f22" stroke-width="5.500" stroke-linecap="round" fill="none"/>
+    <path d="M81 42Q77 47 81 52M79 60Q83 64 79 68" stroke="#cf6d30" stroke-width="1.600" stroke-linecap="round" fill="none"/>`;
+
+const FENJA_HEAD = `${FENJA_FACE}${FENJA_TOP}${FENJA_LOCKS}`;
+
+// Zöpfe beim Volleyball
+const fenjaBraid = (x, dark, light) => [50, 58, 66, 74, 82].map((y, i) =>
+  `<ellipse cx="${x + (i % 2 ? 2 : -2)}" cy="${y}" rx="7" ry="5.500" fill="${i % 2 ? light : dark}"/>`).join('')
+  + `<rect x="${x - 5}" y="87" width="10" height="4" rx="2" fill="#2fc4c9"/><path d="M${x - 5} 91Q${x} 101 ${x + 5} 91Z" fill="${dark}"/>`;
+const FENJA_BRAIDS_BACK = `<circle cx="50" cy="29" r="29" fill="#54291a"/>`;
+const FENJA_BRAIDED_HEAD = `${FENJA_FACE}${FENJA_TOP}${fenjaBraid(17, '#5f2f1c', '#7a3a1e')}${fenjaBraid(83, '#8a4120', '#a84f22')}`;
+
+// Timm: nach hinten gestylte Haare, eckige dunkle Brille, Oberlippen- und Kinnbart
 const TIMM_HEAD = `
-    <circle cx="23" cy="43" r="5" fill="#f2c9a8"/><circle cx="77" cy="43" r="5" fill="#f2c9a8"/>
-    <path d="M24 36C24 16 76 16 76 36C76 54 63 65 50 65C37 65 24 54 24 36Z" fill="#f9d7bb"/>
-    <path d="M26 47C29 60 40 65 50 65C60 65 71 60 74 47C70 54 62 57 50 57C38 57 30 54 26 47Z" fill="#6b4a36" opacity=".32"/>
-    <path d="M42 56Q50 53 58 56" stroke="#6b4a36" stroke-width="2.2" stroke-linecap="round" fill="none" opacity=".4"/>
-    <path d="M23 42C18 33 18 22 25 15C26 8 34 4 41 6C46 0 58 -1 64 4C72 3 80 9 81 18C85 25 83 34 77 42C76 34 73 29 68 27C63 31 54 31 48 27C42 31 34 31 30 28C27 32 24 36 23 42Z" fill="#3a251b"/>
-    <path d="M30 16C36 9 43 8 49 11M53 8C60 7 67 10 72 17M28 25C33 20 39 19 44 21M56 18C62 18 68 21 72 26" stroke="#65452f" stroke-width="2.6" stroke-linecap="round" fill="none"/>
-    <path d="M32 32Q39 28 47 31M53 31Q61 28 68 32" stroke="#2b1a14" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <path d="M22 40Q17 42 19 49Q21 54 25 53ZM78 40Q83 42 81 49Q79 54 75 53Z" fill="#f2c9a8"/>
+    <path d="M25 34C25 15 75 15 75 34C75 53 64 67 50 67C36 67 25 53 25 34Z" fill="#f9d7bb"/>
+    <path d="M26 45C28 58 39 67 50 67C61 67 72 58 74 45C72 52 66 58 60 59Q50 56 40 59C34 58 28 52 26 45Z" fill="#5a3b2a" opacity=".24"/>
+    <path d="M41 53Q46 50 50 51.500Q54 50 59 53Q54 54 50 53.200Q46 54 41 53Z" fill="#4a2e20"/>
+    <path d="M43 61Q50 59 57 61Q56 67 50 67.500Q44 67 43 61Z" fill="#4a2e20"/>
+    <path d="M24 39C20 30 22 19 28 13C36 2 56 -4 70 4C81 9 83 24 77 39C76 33 74 28 72 25C61 28 45 22 33 23C29 27 26 32 24 39Z" fill="#33201a"/>
+    <path d="M30 20C39 8 56 3 72 12M35 23C45 13 59 11 75 20M45 24C53 18 62 18 72 24" stroke="#5e4131" stroke-width="2.400" stroke-linecap="round" fill="none"/>
+    <path d="M24 39C24 33 25 29 28 25M77 39C77 33 76 29 73 25" stroke="#4a3226" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <path d="M31 33Q38 29 46 32M54 32Q62 29 69 33" stroke="#2b1a14" stroke-width="3" stroke-linecap="round" fill="none"/>
     <g class="eyes">
-      <ellipse cx="40" cy="42" rx="5.200" ry="6.200" fill="#fff"/><ellipse cx="60" cy="42" rx="5.200" ry="6.200" fill="#fff"/>
-      <ellipse cx="40.500" cy="42.500" rx="4.200" ry="5.400" fill="#6d3f20"/><ellipse cx="59.500" cy="42.500" rx="4.200" ry="5.400" fill="#6d3f20"/>
-      <circle cx="40.500" cy="42.500" r="2.400" fill="#20130d"/><circle cx="59.500" cy="42.500" r="2.400" fill="#20130d"/>
-      <circle cx="38.800" cy="40" r="1.600" fill="#fff"/><circle cx="57.800" cy="40" r="1.600" fill="#fff"/>
+      <ellipse cx="39" cy="42" rx="4.800" ry="5.200" fill="#fff"/><ellipse cx="61" cy="42" rx="4.800" ry="5.200" fill="#fff"/>
+      <ellipse cx="39.500" cy="42.300" rx="3.900" ry="4.600" fill="#5e3a1f"/><ellipse cx="60.500" cy="42.300" rx="3.900" ry="4.600" fill="#5e3a1f"/>
+      <circle cx="39.500" cy="42.300" r="2.200" fill="#1a100b"/><circle cx="60.500" cy="42.300" r="2.200" fill="#1a100b"/>
+      <circle cx="38" cy="40.300" r="1.400" fill="#fff"/><circle cx="59" cy="40.300" r="1.400" fill="#fff"/>
     </g>
-    <g fill="#fff" fill-opacity=".1" stroke="#15110f" stroke-width="3.2">
-      <rect x="29" y="34" width="20" height="16" rx="4"/><rect x="51" y="34" width="20" height="16" rx="4"/>
+    <g fill="#fff" fill-opacity=".1" stroke="#1d1411" stroke-width="2.800">
+      <rect x="28" y="35" width="22" height="15" rx="2.500"/><rect x="50" y="35" width="22" height="15" rx="2.500"/>
     </g>
-    <path d="M49 40H51M29 39L23 38M71 39L77 38" stroke="#15110f" stroke-width="3.2" stroke-linecap="round"/>
-    <path d="M44 56Q50 60 56 56" stroke="#8c4a3e" stroke-width="2.2" stroke-linecap="round" fill="none"/>`;
+    <path d="M28 39L23 38M72 39L77 38" stroke="#1d1411" stroke-width="2.800" stroke-linecap="round"/>
+    <path d="M44 56.500Q50 60 56 56.500" stroke="#8c4a3e" stroke-width="2" stroke-linecap="round" fill="none"/>`;
 
 const FENJA_SVG = `
 <g class="ch">
@@ -220,7 +240,7 @@ const BEACH_LEGS = `
 
 // Die Strand-Figuren, auch fürs Volleyball-Spiel
 const BEACH_FENJA = `
-        ${FENJA_BACK_HAIR}
+        ${FENJA_BRAIDS_BACK}
         ${beachArm('far', 60, 66, 65)}
         ${BEACH_LEGS}
         <rect x="44" y="60" width="12" height="14" rx="5" fill="${SKIN}"/>
@@ -228,7 +248,7 @@ const BEACH_FENJA = `
         <path d="M33 88H67" stroke="#fff" stroke-width="3" opacity=".85"/>
         <path d="M30 98H70L72 112H53L50 106L47 112H28Z" fill="#159fb0"/>
         ${beachArm('near', 67, 72, 71)}
-        ${FENJA_HEAD}
+        ${FENJA_BRAIDED_HEAD}
         <path d="M24 31Q50 17 76 31" stroke="#2fc4c9" stroke-width="5" stroke-linecap="round" fill="none"/>
         ${shades('#ff7d92', 27, 51)}`;
 
