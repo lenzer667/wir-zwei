@@ -571,15 +571,13 @@ body::before {
 
 /* Laufende Figuren */
 #walk-stage {
-  position: fixed;
-  z-index: 9;
-  left: 0;
-  right: 0;
-  bottom: calc(74px + env(safe-area-inset-bottom));
-  height: 110px;
+  position: relative;
+  height: 76px;
   overflow: hidden;
   pointer-events: none;
 }
+.walk-slot { margin: 6px -14px 0; }
+.walk-slot:empty { display: none; }
 #heart-layer { position: fixed; z-index: 50; inset: 0; overflow: hidden; pointer-events: none; }
 #walkers {
   position: absolute;
@@ -587,13 +585,12 @@ body::before {
   bottom: 0;
   will-change: transform;
 }
-#walkers.typing { display: none; }
 .walk-inner { display: flex; align-items: flex-end; gap: 2px; transition: transform 0.25s; }
 .walk-inner.flip { transform: scaleX(-1); }
-.walk-inner .couple { display: block; width: 108px; height: auto; flex: none; }
+.walk-inner .couple { display: block; width: 86px; height: auto; flex: none; }
 .walk-inner .cat { display: block; width: 44px; height: auto; flex: none; margin-bottom: 1px; }
-.walk-inner .c1 { width: 42px; }
-.walk-inner .c3 { width: 44px; }
+.walk-inner .c1 { width: 34px; }
+.walk-inner .c3 { width: 36px; }
 .leg, .arm { transform-box: fill-box; transform-origin: 50% 0; }
 .paw { transform-box: fill-box; transform-origin: 50% 0; }
 .tail { transform-box: fill-box; transform-origin: 100% 100%; animation: tail 1.8s ease-in-out infinite; }
@@ -814,22 +811,66 @@ body[data-list='winter'] .check[aria-pressed='true']::before { content: '❄️'
 #game {
   position: fixed;
   z-index: 15;
-  inset: 0;
+  top: 0;
+  left: 0;
   display: flex;
-  flex-direction: column;
-  max-width: 480px;
-  margin: 0 auto;
-  padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  align-items: center;
+  transform-origin: 0 0;
   background: #123b4a;
   color: #fff;
   user-select: none;
   -webkit-user-select: none;
+  touch-action: none;
 }
-.g-head { position: relative; display: flex; align-items: center; justify-content: center; min-height: 58px; padding: 0 52px; }
-.g-score { display: flex; align-items: center; gap: 10px; font: 600 16px var(--display); }
-.g-score strong { font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.g-side {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 8px;
+  text-align: center;
+}
+.g-side > strong { margin-bottom: auto; padding-top: 4px; font: 700 18px var(--display); }
+.g-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.g-btn {
+  min-height: 64px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 24px;
+  touch-action: none;
+  transition: background 0.08s, transform 0.08s;
+  -webkit-touch-callout: none;
+}
+.g-btn.jump {
+  border-color: transparent;
+  background: linear-gradient(120deg, #ffc83d, #ff8a4c);
+  color: #123b4a;
+  font: 700 16px var(--display);
+}
+.g-btn.down { background: rgba(255, 255, 255, 0.34); transform: scale(0.95); }
+.g-btn.jump.down { filter: brightness(1.2); background: linear-gradient(120deg, #ffc83d, #ff8a4c); }
+.g-score {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 14px;
+  border-radius: 99px;
+  background: rgba(18, 59, 74, 0.78);
+  font: 600 14px var(--display);
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+.g-score strong { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .g-score i { font-style: normal; opacity: 0.7; }
-.g-close { position: absolute; right: 6px; top: 7px; width: 44px; height: 44px; color: #fff; font-size: 17px; }
+.g-close { position: absolute; z-index: 2; right: 2px; top: 2px; width: 44px; height: 44px; color: #fff; font-size: 17px; }
 .g-stage { position: relative; flex: none; }
 .g-court { display: block; width: 100%; height: auto; }
 .g-banner {
@@ -847,25 +888,6 @@ body[data-list='winter'] .check[aria-pressed='true']::before { content: '❄️'
   transition: opacity 0.15s, transform 0.15s;
 }
 .g-banner.show { opacity: 1; transform: translate(-50%, 0); }
-.g-pads { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; min-height: 130px; padding: 8px; }
-.g-pads.solo { grid-template-columns: 1fr; }
-.g-pad {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 10px;
-  border: 2px dashed rgba(255, 255, 255, 0.35);
-  border-radius: 20px;
-  text-align: center;
-  touch-action: none;
-  cursor: pointer;
-  transition: background 0.12s;
-}
-.g-pad.down { background: rgba(255, 255, 255, 0.16); }
-.g-pad strong { font: 700 22px var(--display); }
-.g-pad span { font-size: 12.5px; line-height: 1.25; opacity: 0.8; pointer-events: none; }
 .g-end { display: none; position: absolute; inset: 0; place-items: center; padding: 16px; background: rgba(8, 24, 32, 0.7); }
 .g-end.open { display: grid; }
 .g-end .sheet { color: #123b4a; background: #fffbf0; }
@@ -874,6 +896,74 @@ body[data-list='winter'] .check[aria-pressed='true']::before { content: '❄️'
 .g-end .btn.ghost { background: #fff4d9; border-color: rgba(18, 59, 74, 0.16); }
 .g-player .v-arm { transform-box: fill-box; transform-origin: 50% 0; transition: transform 0.1s; }
 .g-player.hit .v-arm { transform: rotate(-120deg); }
+
+/* ---------- Kompakter fürs Handy ---------- */
+body { font-size: 15px; }
+h2 { font-size: 18px; }
+#app { gap: 10px; padding: calc(34px + env(safe-area-inset-top)) 12px calc(76px + env(safe-area-inset-bottom)); }
+.brand { font-size: 22px; }
+.eyebrow { font-size: 18px; }
+.avatar { width: 38px; height: 38px; font-size: 16px; }
+.page-head { padding-top: 0; }
+.page-head h1 { font-size: 25px; }
+.page-head .muted { font-size: 14px; }
+.card { gap: 9px; padding: 13px 14px; border-radius: 20px; }
+.hero { padding: 14px 14px 0; border-radius: 24px; }
+.hero-names { font-size: 22px; }
+.hero-num { margin-top: 0; font-size: clamp(60px, 20vw, 84px); }
+.hero-unit { font-size: 16px; }
+.hero-sub { margin-top: 2px; font-size: 12.5px; }
+.countdown-head h2 { font-size: 20px; }
+.countdown-num strong { font-size: 34px; }
+.countdown-num span { font-size: 12px; }
+textarea, input:not([type='radio']) { padding: 10px 12px; border-radius: 12px; }
+textarea { margin-bottom: 8px; }
+.tiles { gap: 8px; }
+.tile { padding: 9px 10px; border-radius: 14px; }
+.tile strong { font-size: 20px; }
+.tile span { font-size: 11.5px; }
+.btn { min-height: 42px; padding: 0 14px; border-radius: 12px; }
+.btn.small { min-height: 36px; }
+.btn.big { min-height: 48px; font-size: 17px; }
+.deck { height: min(44dvh, 330px); min-height: 240px; margin-top: 0; }
+.dish { gap: 8px; border-radius: 22px; }
+.dish-emoji { font-size: 72px; }
+.dish h2 { font-size: 23px; }
+.stamp { top: 14px; font-size: 21px; }
+.swipe-buttons { margin-top: 2px; }
+.round { width: 52px; height: 52px; font-size: 20px; }
+.section { gap: 8px; padding-top: 6px; }
+.pick-btn { padding: 11px 13px; border-radius: 18px; }
+.pick-btn > span:first-child { font-size: 26px; }
+.pick-btn strong { font-size: 17px; }
+.movie-form { gap: 8px; }
+.tabs button { min-height: 38px; }
+.list { gap: 6px; }
+.item { min-height: 48px; padding: 2px 2px 2px 3px; border-radius: 13px; }
+.item-body { padding: 4px 2px; }
+.item-body small { font-size: 12px; }
+.seasons button { min-height: 50px; padding: 5px 2px; border-radius: 13px; font-size: 11.5px; }
+.seasons button span { font-size: 18px; }
+.poster { height: 128px; border-radius: 20px; }
+.poster span { padding: 20px 12px 6px; font-size: 21px; }
+.beach-scene { border-radius: 20px; }
+.beach-scene figcaption { font-size: 19px; }
+.duel-score strong { font-size: 34px; }
+.game-note { font-size: 13px; }
+body[data-list='summer'] #app { padding-top: calc(14px + env(safe-area-inset-top)); }
+#nav {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  padding: 3px 6px calc(3px + env(safe-area-inset-bottom));
+  border-width: 1px 0 0;
+  border-radius: 16px 16px 0 0;
+  transform: none;
+}
+#nav button { min-height: 46px; padding: 4px 0 2px; border-radius: 12px; font-size: 11px; }
+#nav svg { width: 20px; height: 20px; }
+#toast { bottom: calc(66px + env(safe-area-inset-bottom)); }
 
 .welcome-couple { width: 170px; align-self: center; margin-bottom: 6px; }
 .welcome .glow { inset: 0 0 auto; }

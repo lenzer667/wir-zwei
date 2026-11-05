@@ -106,6 +106,7 @@ function viewHome() {
       <p class="hero-num" data-days="${days}" aria-label="${days} Tage">${days.toLocaleString('de-DE')}</p>
       <p class="hero-unit">Tage zusammen</p>
       <p class="hero-sub">${plural(months, 'Monat', 'Monate')} und ${plural(rest, 'Tag', 'Tage')}, seit dem ${fmtDate(START)}</p>
+      <div class="walk-slot"></div>
     </section>
 
     ${todayMs ? `<section class="card today-ms"><p class="eyebrow">Heute ist es so weit</p><h2>${esc(todayMs.label)}!</h2><p>Herzlichen Glückwunsch, ihr zwei.</p></section>` : ''}
@@ -486,7 +487,7 @@ function render() {
   const scene = !me ? '' : UI.view === 'game' ? 'summer' : UI.view === 'bucket' && THEME_COLORS[UI.season] ? UI.season : '';
   document.body.dataset.list = scene;
   document.querySelector('meta[name=theme-color]').content = THEME_COLORS[scene] || '#17100e';
-  Decor.show(!!me && !scene);
+  Decor.show(!!me && UI.view === 'home');
   if (!me) {
     $app.innerHTML = viewWelcome();
     $nav.innerHTML = '';
@@ -494,6 +495,7 @@ function render() {
     return;
   }
   $app.innerHTML = VIEWS[UI.view]();
+  if (UI.view === 'home') Decor.mount($app.querySelector('.walk-slot'));
   if (UI.view === 'home' && !UI.counted) {
     UI.counted = true;
     countUp($app.querySelector('.hero-num'));
@@ -610,7 +612,7 @@ const ACTIONS = {
       <button class="btn ghost wide" data-action="toggle-walkers">${Decor.prefOn() ? 'Laufende Figuren ausblenden' : 'Laufende Figuren einblenden'}</button>
     </div>`),
   'game-start': (d) => VolleyGame.start({ mode: d.mode, me, onClose: render }),
-  'toggle-walkers': () => { Decor.setPref(!Decor.prefOn()); closeOverlay(); },
+  'toggle-walkers': () => { Decor.setPref(!Decor.prefOn()); closeOverlay(); render(); },
   poster: () => openOverlay(`
     <div class="poster-full pop">
       <img src="assets/herbst.jpg" alt="Eure Herbst- und Halloween-Bucket-List als Bild">

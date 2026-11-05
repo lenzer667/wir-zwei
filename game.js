@@ -33,7 +33,7 @@ const VolleyGame = (() => {
   }
 
   function makePlayer(id, name, side, x, min, max) {
-    return { id, name, side, x, y: GROUND, vx: 0, vy: 0, min, max, target: null, cooldown: 0, hitTimer: 0, keyL: false, keyR: false, cpu: false };
+    return { id, name, side, x, y: GROUND, vx: 0, vy: 0, min, max, cooldown: 0, hitTimer: 0, keyL: false, keyR: false, cpu: false };
   }
 
   function jump(p) {
@@ -75,9 +75,6 @@ const VolleyGame = (() => {
   function stepPlayer(p, dt) {
     if (p.cpu) {
       steerCpu(p);
-    } else if (p.target !== null) {
-      const d = p.target - p.x;
-      p.vx = Math.abs(d) < 3 ? 0 : Math.sign(d) * RUN_SPEED;
     } else {
       p.vx = (p.keyR ? RUN_SPEED : 0) - (p.keyL ? RUN_SPEED : 0);
     }
@@ -220,28 +217,61 @@ const VolleyGame = (() => {
     s.root.querySelector('#g-end').classList.add('open');
     s.root.querySelector('#g-leave').onclick = stop;
     const { mode, me, onClose } = s;
-    s.root.querySelector('#g-again').onclick = () => { stop(); start({ mode, me, onClose }); };
+    s.root.querySelector('#g-again').onclick = () => { stop(true); start({ mode, me, onClose }); };
     if (typeof confetti === 'function') confetti();
   }
 
   // ---------- Steuerung ----------
-  function bindPad(pad, player) {
-    const toTarget = (e) => {
-      const r = pad.getBoundingClientRect();
-      const ratio = clamp((e.clientX - r.left) / r.width, 0, 1);
-      player.target = player.min + ratio * (player.max - player.min);
-    };
-    pad.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      pad.setPointerCapture(e.pointerId);
-      pad.classList.add('down');
-      toTarget(e);
-      jump(player);
+  const moveButtons = (who) => `
+    <button class="g-btn" data-act="keyL" aria-label="${who} nach links">◀</button>
+    <button class="g-btn" data-act="keyR" aria-label="${who} nach rechts">▶</button>`;
+  const jumpButton = (who) => `<button class="g-btn jump" data-act="jump" aria-label="${who} springt">Springen</button>`;
+
+  function bindButtons(box, player) {
+    box.querySelectorAll('.g-btn').forEach((btn) => {
+      const act = btn.dataset.act;
+      const release = () => {
+        btn.classList.remove('down');
+        if (act !== 'jump') player[act] = false;
+      };
+      btn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        btn.classList.add('down');
+        if (act === 'jump') jump(player);
+        else player[act] = true;
+      });
+      btn.addEventListener('pointerup', release);
+      btn.addEventListener('pointercancel', release);
+      btn.addEventListener('pointerleave', release);
+      btn.addEventListener('contextmenu', (e) => e.preventDefault());
     });
-    pad.addEventListener('pointermove', (e) => { if (pad.hasPointerCapture(e.pointerId)) toTarget(e); });
-    const up = () => { player.target = null; pad.classList.remove('down'); };
-    pad.addEventListener('pointerup', up);
-    pad.addEventListener('pointercancel', up);
+  }
+
+  // Immer quer: Das Handy wird nach Möglichkeit gedreht, sonst dreht sich die Spielfläche selbst.
+  function layout() {
+    if (!s) return;
+    const portrait = innerHeight > innerWidth;
+    const gw = portrait ? innerHeight : innerWidth;
+    const gh = portrait ? innerWidth : innerHeight;
+    const courtW = Math.min(gh * (4 / 3), gw - 2 * 122);
+    s.root.style.width = `${gw}px`;
+    s.root.style.height = `${gh}px`;
+    s.root.style.transform = portrait ? `translateX(${gh}px) rotate(90deg)` : 'none';
+    s.root.querySelector('.g-stage').style.width = `${courtW}px`;
+  }
+
+  function goLandscape() {
+    const el = document.documentElement;
+    if (!el.requestFullscreen) return;
+    el.requestFullscreen({ navigationUI: 'hide' })
+      .then(() => screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape'))
+      .catch(() => {})
+      .finally(layout);
+  }
+
+  function leaveLandscape() {
+    try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch {}
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
   }
 
   function onKey(e) {
@@ -263,12 +293,14 @@ const VolleyGame = (() => {
     const root = document.createElement('div');
     root.id = 'game';
     root.innerHTML = `
-      <header class="g-head">
+      <div class="g-side" id="g-left"></div>
+      <div class="g-stage">
+        ${courtSVG()}
         <div class="g-score"><span>${nameA}</span><strong id="g-score-a">0</strong><i>:</i><strong id="g-score-b">0</strong><span>${nameB}</span></div>
-        <button class="g-close" id="g-close" aria-label="Spiel beenden">✕</button>
-      </header>
-      <div class="g-stage">${courtSVG()}<p class="g-banner" id="g-banner" role="status"></p></div>
-      <div class="g-pads ${mode === 'cpu' ? 'solo' : ''}" id="g-pads"></div>
+        <p class="g-banner" id="g-banner" role="status"></p>
+      </div>
+      <div class="g-side" id="g-right"></div>
+      <button class="g-close" id="g-close" aria-label="Spiel beenden">✕</button>
       <div class="g-end" id="g-end"></div>`;
     document.body.appendChild(root);
 
@@ -282,23 +314,33 @@ const VolleyGame = (() => {
       elBanner: root.querySelector('#g-banner'),
     };
 
-    const pads = root.querySelector('#g-pads');
-    const padHTML = (cls, name) => `<div class="g-pad ${cls}" data-name="${name}"><strong>${name}</strong><span>Antippen zum Springen</span><span>Gedrückt halten und ziehen zum Laufen</span></div>`;
+    const left = root.querySelector('#g-left');
+    const right = root.querySelector('#g-right');
     if (mode === 'cpu') {
+      // Wie ein Gamepad: links laufen, rechts springen
       const humanIsB = me === nameB;
+      const human = humanIsB ? b : a;
       (humanIsB ? a : b).cpu = true;
       s.cpuName = (humanIsB ? a : b).name;
-      pads.innerHTML = padHTML('', me);
-      bindPad(pads.firstElementChild, humanIsB ? b : a);
+      left.innerHTML = `<div class="g-row">${moveButtons(me)}</div>`;
+      right.innerHTML = jumpButton(me);
+      bindButtons(left, human);
+      bindButtons(right, human);
     } else {
-      pads.innerHTML = padHTML('', nameA) + padHTML('', nameB);
-      bindPad(pads.children[0], a);
-      bindPad(pads.children[1], b);
+      left.innerHTML = `<strong>${nameA}</strong>${jumpButton(nameA)}<div class="g-row">${moveButtons(nameA)}</div>`;
+      right.innerHTML = `<strong>${nameB}</strong>${jumpButton(nameB)}<div class="g-row">${moveButtons(nameB)}</div>`;
+      bindButtons(left, a);
+      bindButtons(right, b);
     }
 
     root.querySelector('#g-close').onclick = stop;
     window.addEventListener('keydown', onKey);
     window.addEventListener('keyup', onKey);
+    window.addEventListener('resize', layout);
+    window.addEventListener('orientationchange', layout);
+    document.documentElement.style.overflow = 'hidden';
+    layout();
+    goLandscape();
     serve(Math.random() < 0.5 ? 'left' : 'right');
     paint();
     s.raf = requestAnimationFrame(loop);
@@ -310,8 +352,12 @@ const VolleyGame = (() => {
     cancelAnimationFrame(raf);
     window.removeEventListener('keydown', onKey);
     window.removeEventListener('keyup', onKey);
+    window.removeEventListener('resize', layout);
+    window.removeEventListener('orientationchange', layout);
     root.remove();
+    document.documentElement.style.overflow = '';
     s = null;
+    if (silent !== true) leaveLandscape();
     if (silent !== true && onClose) onClose();
   }
 

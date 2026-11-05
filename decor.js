@@ -3,41 +3,54 @@
 // ---------- Figuren ----------
 const SKIN = '#f9d7bb';
 
+// Lange, wellige Haare nach eurem Bild
 const FENJA_BACK_HAIR = `
-    <g fill="#6e4426">
-      <circle cx="50" cy="28" r="31"/><circle cx="20" cy="38" r="12"/><circle cx="80" cy="38" r="12"/>
-      <circle cx="16" cy="56" r="12"/><circle cx="84" cy="56" r="12"/><circle cx="20" cy="73" r="11"/>
-      <circle cx="80" cy="73" r="11"/><circle cx="27" cy="87" r="9"/><circle cx="73" cy="87" r="9"/>
-    </g>`;
+    <path d="M50 3C25 2 13 19 14 39C14 50 7 58 9 71C11 83 18 92 30 95C28 88 30 82 33 78H67C70 82 72 88 70 95C82 92 89 83 91 71C93 58 86 50 86 39C87 19 75 2 50 3Z" fill="#6b4126"/>
+    <path d="M17 44C14 56 12 66 17 78C19 84 23 88 27 90M83 44C86 56 88 66 83 78C81 84 77 88 73 90" stroke="#8d5a33" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <path d="M23 50C20 60 19 70 23 80M77 50C80 60 81 70 77 80" stroke="#a9733f" stroke-width="2" stroke-linecap="round" fill="none"/>`;
 
 const FENJA_HEAD = `
-    <ellipse cx="50" cy="38" rx="28" ry="26" fill="${SKIN}"/>
-    <path d="M22 40C20 14 40 8 52 9C70 8 82 20 78 42C75 30 68 23 58 24C54 31 40 32 30 28C26 31 23 35 22 40Z" fill="#7c4e2c"/>
-    <path d="M34 15Q44 10 54 12" stroke="#a06a3e" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <path d="M23 36C23 16 77 16 77 36C77 53 62 65 50 65C38 65 23 53 23 36Z" fill="#fbdcc4"/>
+    <path d="M50 8C33 6 18 19 19 42C24 31 33 25 45 21C48 18 50 13 50 8Z" fill="#7c4c2b"/>
+    <path d="M50 8C67 6 82 19 81 42C76 31 67 24 56 21C53 18 51 13 50 8Z" fill="#744628"/>
+    <path d="M32 16C38 12 43 11 47 12M59 13C65 13 71 17 74 22" stroke="#a9733f" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+    <path d="M21 38C17 46 22 52 19 60C18 64 20 67 23 69M79 38C83 46 78 52 81 60C82 64 80 67 77 69" stroke="#7c4c2b" stroke-width="6" stroke-linecap="round" fill="none"/>
+    <path d="M31 31Q37 28 43 30M57 30Q63 28 69 31" stroke="#5c3a24" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+    <ellipse cx="33" cy="50" rx="5" ry="3" fill="#ff9fae" opacity=".55"/><ellipse cx="67" cy="50" rx="5" ry="3" fill="#ff9fae" opacity=".55"/>
     <g class="eyes">
-      <ellipse cx="41" cy="42" rx="6.8" ry="8.2" fill="#2b1a17"/><ellipse cx="41" cy="43.5" rx="5.2" ry="6.4" fill="#4f93dc"/><circle cx="41" cy="44" r="2.9" fill="#1c2c4a"/><circle cx="38.8" cy="39.8" r="2.1" fill="#fff"/><circle cx="43" cy="46.5" r="1" fill="#fff"/>
-      <ellipse cx="63" cy="42" rx="6.8" ry="8.2" fill="#2b1a17"/><ellipse cx="63" cy="43.5" rx="5.2" ry="6.4" fill="#4f93dc"/><circle cx="63" cy="44" r="2.9" fill="#1c2c4a"/><circle cx="60.8" cy="39.8" r="2.1" fill="#fff"/><circle cx="65" cy="46.5" r="1" fill="#fff"/>
+      <ellipse cx="38" cy="42" rx="8" ry="9.6" fill="#fff"/><ellipse cx="62" cy="42" rx="8" ry="9.6" fill="#fff"/>
+      <ellipse cx="38.5" cy="42.5" rx="6.6" ry="8.6" fill="#2f6fc0"/><ellipse cx="61.5" cy="42.5" rx="6.6" ry="8.6" fill="#2f6fc0"/>
+      <ellipse cx="38.5" cy="46" rx="5" ry="4.6" fill="#7cc0f2"/><ellipse cx="61.5" cy="46" rx="5" ry="4.6" fill="#7cc0f2"/>
+      <circle cx="38.5" cy="42" r="3.6" fill="#16233f"/><circle cx="61.5" cy="42" r="3.6" fill="#16233f"/>
+      <circle cx="35.6" cy="38.4" r="2.8" fill="#fff"/><circle cx="58.6" cy="38.4" r="2.8" fill="#fff"/>
+      <circle cx="41.4" cy="46.6" r="1.3" fill="#fff"/><circle cx="64.4" cy="46.6" r="1.3" fill="#fff"/>
+      <path d="M28 40C30 33 44 30 47 36M72 40C70 33 56 30 53 36" stroke="#2b1a17" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+      <path d="M28 40L25.500 38M72 40L74.500 38" stroke="#2b1a17" stroke-width="1.4" stroke-linecap="round"/>
     </g>
-    <ellipse cx="32" cy="52" rx="5" ry="3" fill="#ff8d9c" opacity=".6"/><ellipse cx="72" cy="52" rx="5" ry="3" fill="#ff8d9c" opacity=".6"/>
-    <path d="M47 52Q52 60 57 52Z" fill="#c8475c"/>`;
+    <path d="M49.300 51.500Q50 52.500 50.700 51.500" stroke="#d99a86" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+    <path d="M43.500 54.500Q50 56.500 56.500 54.500Q55 62 50 62Q45 62 43.500 54.500Z" fill="#c8475c"/>
+    <path d="M44.800 55Q50 56.400 55.200 55L54.700 56.800Q50 57.900 45.300 56.800Z" fill="#fff"/>`;
 
+// Dunkles, zerzaustes Haar mit viel Volumen, dicke schwarze Brille, leichter Bart
 const TIMM_HEAD = `
-    <circle cx="22" cy="42" r="5" fill="#f2c9a8"/><circle cx="78" cy="42" r="5" fill="#f2c9a8"/>
-    <ellipse cx="50" cy="38" rx="27" ry="26" fill="${SKIN}"/>
-    <path d="M28 50Q33 64 50 64Q67 64 72 50Q68 59 50 59Q32 59 28 50Z" fill="#6b4a36" opacity=".35"/>
-    <path d="M22 41C14 12 38 2 52 5C72 1 88 18 78 42C77 32 72 25 63 26C60 21 56 24 52 22C50 27 41 24 36 27C31 29 27 34 22 41Z" fill="#3f2a20"/>
-    <path d="M30 13L27 4L38 9L42 1L50 7L60 1L63 9L74 6L72 15Z" fill="#3f2a20"/>
-    <path d="M40 11Q50 7 60 11" stroke="#6a4a38" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    <circle cx="23" cy="43" r="5" fill="#f2c9a8"/><circle cx="77" cy="43" r="5" fill="#f2c9a8"/>
+    <path d="M24 36C24 16 76 16 76 36C76 54 63 65 50 65C37 65 24 54 24 36Z" fill="#f9d7bb"/>
+    <path d="M26 47C29 60 40 65 50 65C60 65 71 60 74 47C70 54 62 57 50 57C38 57 30 54 26 47Z" fill="#6b4a36" opacity=".32"/>
+    <path d="M42 56Q50 53 58 56" stroke="#6b4a36" stroke-width="2.2" stroke-linecap="round" fill="none" opacity=".4"/>
+    <path d="M23 42C18 33 18 22 25 15C26 8 34 4 41 6C46 0 58 -1 64 4C72 3 80 9 81 18C85 25 83 34 77 42C76 34 73 29 68 27C63 31 54 31 48 27C42 31 34 31 30 28C27 32 24 36 23 42Z" fill="#3a251b"/>
+    <path d="M30 16C36 9 43 8 49 11M53 8C60 7 67 10 72 17M28 25C33 20 39 19 44 21M56 18C62 18 68 21 72 26" stroke="#65452f" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+    <path d="M32 32Q39 28 47 31M53 31Q61 28 68 32" stroke="#2b1a14" stroke-width="3" stroke-linecap="round" fill="none"/>
     <g class="eyes">
-      <ellipse cx="40" cy="42" rx="5.2" ry="6.2" fill="#2b1a17"/><ellipse cx="40" cy="43" rx="3.8" ry="4.7" fill="#7c4a26"/><circle cx="38.5" cy="40.6" r="1.6" fill="#fff"/>
-      <ellipse cx="62" cy="42" rx="5.2" ry="6.2" fill="#2b1a17"/><ellipse cx="62" cy="43" rx="3.8" ry="4.7" fill="#7c4a26"/><circle cx="60.5" cy="40.6" r="1.6" fill="#fff"/>
+      <ellipse cx="40" cy="42" rx="5.200" ry="6.200" fill="#fff"/><ellipse cx="60" cy="42" rx="5.200" ry="6.200" fill="#fff"/>
+      <ellipse cx="40.500" cy="42.500" rx="4.200" ry="5.400" fill="#6d3f20"/><ellipse cx="59.500" cy="42.500" rx="4.200" ry="5.400" fill="#6d3f20"/>
+      <circle cx="40.500" cy="42.500" r="2.400" fill="#20130d"/><circle cx="59.500" cy="42.500" r="2.400" fill="#20130d"/>
+      <circle cx="38.800" cy="40" r="1.600" fill="#fff"/><circle cx="57.800" cy="40" r="1.600" fill="#fff"/>
     </g>
-    <g fill="#fff" fill-opacity=".1" stroke="#15110f" stroke-width="2.8">
-      <rect x="29" y="33" width="21" height="18" rx="5"/><rect x="52" y="33" width="21" height="18" rx="5"/>
+    <g fill="#fff" fill-opacity=".1" stroke="#15110f" stroke-width="3.2">
+      <rect x="29" y="34" width="20" height="16" rx="4"/><rect x="51" y="34" width="20" height="16" rx="4"/>
     </g>
-    <path d="M50 40H52M29 39L23 38M73 39L78 38" stroke="#15110f" stroke-width="2.8" stroke-linecap="round"/>
-    <ellipse cx="29" cy="55" rx="4" ry="2.4" fill="#ff8d9c" opacity=".4"/><ellipse cx="73" cy="55" rx="4" ry="2.4" fill="#ff8d9c" opacity=".4"/>
-    <path d="M45 54.5Q51 59 57 54.5" stroke="#8c4a3e" stroke-width="2.2" stroke-linecap="round" fill="none"/>`;
+    <path d="M49 40H51M29 39L23 38M71 39L77 38" stroke="#15110f" stroke-width="3.2" stroke-linecap="round"/>
+    <path d="M44 56Q50 60 56 56" stroke="#8c4a3e" stroke-width="2.2" stroke-linecap="round" fill="none"/>`;
 
 const FENJA_SVG = `
 <g class="ch">
@@ -217,7 +230,7 @@ const BEACH_FENJA = `
         ${beachArm('near', 67, 72, 71)}
         ${FENJA_HEAD}
         <path d="M24 31Q50 17 76 31" stroke="#2fc4c9" stroke-width="5" stroke-linecap="round" fill="none"/>
-        ${shades('#ff7d92', 31, 53)}`;
+        ${shades('#ff7d92', 27, 51)}`;
 
 const BEACH_TIMM = `
         ${beachArm('far', 60, 66, 65)}
@@ -229,7 +242,7 @@ const BEACH_TIMM = `
         <path d="M34 106V116M66 106V116" stroke="#fff" stroke-width="2.5"/>
         ${beachArm('near', 67, 72, 71)}
         ${TIMM_HEAD}
-        ${shades('#0b0d12', 28, 52)}`;
+        ${shades('#0b0d12', 28, 50)}`;
 
 const VOLLEYBALL = `
         <circle r="11" fill="#fff" stroke="#27566b" stroke-width="1.4"/>
@@ -352,7 +365,10 @@ const Decor = (() => {
   const stage = document.createElement('div');
   stage.id = 'walk-stage';
   stage.appendChild(walkers);
-  document.body.appendChild(stage);
+  // Die Figuren laufen in einem eigenen Streifen auf der Startseite und verdecken so nichts.
+  function mount(slot) {
+    if (slot && prefOn()) slot.appendChild(stage);
+  }
   const inner = walkers.firstElementChild;
 
   let enabled = false;
@@ -385,7 +401,7 @@ const Decor = (() => {
     const dt = last ? Math.min(0.05, (t - last) / 1000) : 0;
     last = t;
     const gw = walkers.offsetWidth;
-    const W = innerWidth;
+    const W = stage.clientWidth || innerWidth;
     if (state === 'walk') {
       const step = 32 * dt;
       x += dir * step;
@@ -427,9 +443,5 @@ const Decor = (() => {
     if (state === 'walk') { setState('pause'); until = performance.now() + 1500; }
   });
 
-  // Mit offener Tastatur stören sie nur.
-  document.addEventListener('focusin', (e) => { if (e.target.matches('input, textarea')) walkers.classList.add('typing'); });
-  document.addEventListener('focusout', () => walkers.classList.remove('typing'));
-
-  return { hearts, setAmbience, show, setPref, prefOn };
+  return { hearts, setAmbience, show, mount, setPref, prefOn };
 })();
