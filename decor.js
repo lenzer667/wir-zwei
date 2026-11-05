@@ -52,28 +52,27 @@ const FENJA_BRAIDED_HEAD = `${FENJA_FACE}
     <path d="M50 8C33 6 21 17 20 38C25 27 36 19 50 16C64 19 75 27 80 38C79 17 67 6 50 8Z" fill="#54291a"/>
     <path d="M46 10C37 11 29 17 26 26M54 10C63 11 71 17 74 26M50 8V16" stroke="#7a3a1e" stroke-width="1.800" stroke-linecap="round" fill="none"/>`;
 
-// Timm: kleiner Schnauzer und einzelne Barthaare an den Seiten und am Kinn
+// Timm: Gesicht ohne Bart
 const TIMM_FACE = `
     <path d="M22 40Q17 42 19 49Q21 54 25 53ZM78 40Q83 42 81 49Q79 54 75 53Z" fill="#f2c9a8"/>
     <path d="M25 34C25 15 75 15 75 34C75 53 64 67 50 67C36 67 25 53 25 34Z" fill="#f9d7bb"/>
-    <path d="M27 47l.6 2.400M28.600 46.500l.5 2.600M28.400 50l.9 2.400M30 49.800l.8 2.600M30 53l1.200 2.200M31.800 52.600l1 2.400M32.200 56l1.600 1.800M34.200 55.400l1.200 2.200M35.600 58.600l1.800 1.400M73 47l-.6 2.400M71.400 46.500l-.5 2.600M71.600 50l-.9 2.400M70 49.800l-.8 2.600M70 53l-1.200 2.200M68.200 52.600l-1 2.400M67.800 56l-1.600 1.800M65.800 55.400l-1.200 2.200M64.400 58.600l-1.800 1.400" stroke="#5a3b2a" stroke-width=".8" stroke-linecap="round"/>
-    <path d="M43.500 61.500l.6 1.900M45.500 62l.4 2.400M47 61.300l.3 2M48.500 62.600l.2 2.600M50 61.800v2.100M51.500 62.600l-.2 2.600M53 61.300l-.3 2M54.500 62l-.4 2.400M56.500 61.500l-.6 1.900M46.500 65l.5 1M50 65.300v1.200M53.500 65l-.5 1" stroke="#5a3b2a" stroke-width=".8" stroke-linecap="round"/>
-    <path d="M44 53.200Q47 51 50 52.200Q53 51 56 53.200Q53 54.200 50 53.500Q47 54.200 44 53.200Z" fill="#4a2e20"/>
-    <path d="M45 56Q50 59 55 56" stroke="#8c4a3e" stroke-width="2" stroke-linecap="round" fill="none"/>`;
+    <path d="M45 56.300Q50 59 55 56.300" stroke="#8c4a3e" stroke-width="1.700" stroke-linecap="round" fill="none"/>`;
+
+// Der Kopf ist etwas kleiner als der Körper, damit die Figur nicht so wuchtig wirkt.
+const timmHeadSize = (inner) => `<g transform="translate(6 8) scale(.88)">${inner}</g>`;
 
 const TIMM_BROWS = `
-    <path d="M31 33Q38 29 46 32M54 32Q62 29 69 33" stroke="#2b1a14" stroke-width="3" stroke-linecap="round" fill="none"/>`;
+    <path d="M32 33Q38 30 46 32.500M54 32.500Q62 30 68 33" stroke="#2b1a14" stroke-width="2.200" stroke-linecap="round" fill="none"/>`;
 
 // Sonst: nach hinten gestylt
 const TIMM_SLICK_HAIR = `
     <path d="M24 39C20 30 22 19 28 13C36 2 56 -4 70 4C81 9 83 24 77 39C76 33 74 28 72 25C61 28 45 22 33 23C29 27 26 32 24 39Z" fill="#33201a"/>
-    <path d="M30 20C39 8 56 3 72 12M35 23C45 13 59 11 75 20M45 24C53 18 62 18 72 24" stroke="#5e4131" stroke-width="2.400" stroke-linecap="round" fill="none"/>
-    <path d="M24 39C24 33 25 29 28 25M77 39C77 33 76 29 73 25" stroke="#4a3226" stroke-width="3" stroke-linecap="round" fill="none"/>`;
+    <path d="M30 20C39 8 56 3 72 12M35 23C45 13 59 11 75 20M45 24C53 18 62 18 72 24" stroke="#54392b" stroke-width="1.200" stroke-linecap="round" fill="none"/>`;
 
 // Beim Volleyball: vom Wind zerzaust
 const TIMM_TOUSLED_HAIR = `
     <path d="M22 40C16 31 17 18 25 11C31 3 46 -3 58 2C70 -2 84 8 83 20C88 28 84 37 78 42C77 35 74 30 69 27C66 31 59 29 55 26C50 31 42 29 38 25C33 27 27 32 22 40Z" fill="#33201a"/>
-    <path d="M28 21C33 11 44 7 54 9M58 8C67 8 75 14 78 24M34 25C39 18 47 16 53 19M58 16C65 16 70 20 73 26" stroke="#5e4131" stroke-width="2.400" stroke-linecap="round" fill="none"/>`;
+    <path d="M28 21C33 11 44 7 54 9M58 8C67 8 75 14 78 24M34 25C39 18 47 16 53 19M58 16C65 16 70 20 73 26" stroke="#54392b" stroke-width="1.200" stroke-linecap="round" fill="none"/>`;
 
 const TIMM_HEAD = `${TIMM_FACE}${TIMM_SLICK_HAIR}${TIMM_BROWS}
     <g class="eyes">
@@ -82,10 +81,10 @@ const TIMM_HEAD = `${TIMM_FACE}${TIMM_SLICK_HAIR}${TIMM_BROWS}
       <circle cx="39.500" cy="42.300" r="2.200" fill="#1a100b"/><circle cx="60.500" cy="42.300" r="2.200" fill="#1a100b"/>
       <circle cx="38" cy="40.300" r="1.400" fill="#fff"/><circle cx="59" cy="40.300" r="1.400" fill="#fff"/>
     </g>
-    <g fill="#fff" fill-opacity=".1" stroke="#1d1411" stroke-width="2.800">
-      <rect x="28" y="35" width="22" height="15" rx="2.500"/><rect x="50" y="35" width="22" height="15" rx="2.500"/>
+    <g fill="#fff" fill-opacity=".08" stroke="#1d1411" stroke-width="1.800">
+      <rect x="29" y="36" width="19.500" height="13.500" rx="2.500"/><rect x="51.500" y="36" width="19.500" height="13.500" rx="2.500"/>
     </g>
-    <path d="M28 39L23 38M72 39L77 38" stroke="#1d1411" stroke-width="2.800" stroke-linecap="round"/>`;
+    <path d="M48.500 40H51.500M29 39.500L24 38.500M71 39.500L76 38.500" stroke="#1d1411" stroke-width="1.800" stroke-linecap="round"/>`;
 
 const FENJA_SVG = `
 <g class="ch">
@@ -107,15 +106,15 @@ const TIMM_SVG = `
 <g class="ch" transform="translate(84 -6)">
   <ellipse cx="50" cy="139" rx="25" ry="3.5" fill="#000" opacity=".3"/>
   <g class="bob">
-    <g class="leg a"><rect x="37" y="100" width="12" height="33" rx="6" fill="#2c2730"/><ellipse cx="44" cy="134" rx="9" ry="4.5" fill="#e9e1d8"/></g>
-    <g class="leg b"><rect x="51" y="100" width="12" height="33" rx="6" fill="#37313c"/><ellipse cx="58" cy="134" rx="9" ry="4.5" fill="#f5eee6"/></g>
-    <g class="arm back"><path d="M68 78Q76 88 75 99" stroke="#463e4e" stroke-width="10" stroke-linecap="round" fill="none"/><circle cx="75" cy="102" r="5" fill="${SKIN}"/></g>
-    <ellipse cx="50" cy="68" rx="21" ry="9" fill="#332d3a"/>
-    <path d="M32 72Q50 65 68 72L72 106Q50 112 28 106Z" fill="#4c4455" stroke="#6b6176" stroke-width="1"/>
-    <path d="M38 93H62L65 104H35Z" fill="#3d3645"/>
-    <path d="M45 73V84M55 73V84" stroke="#d8cfc4" stroke-width="1.8" stroke-linecap="round"/>
-    <path d="M32 78Q20 88 8 98" stroke="#463e4e" stroke-width="10" stroke-linecap="round" fill="none"/>
-    ${TIMM_HEAD}
+    <g class="leg a"><rect x="40" y="102" width="9" height="31" rx="4.5" fill="#2c2730"/><ellipse cx="44.500" cy="134" rx="7.500" ry="4" fill="#e9e1d8"/></g>
+    <g class="leg b"><rect x="51" y="102" width="9" height="31" rx="4.5" fill="#37313c"/><ellipse cx="55.500" cy="134" rx="7.500" ry="4" fill="#f5eee6"/></g>
+    <g class="arm back"><path d="M64 78Q69 88 68 100" stroke="#463e4e" stroke-width="7.500" stroke-linecap="round" fill="none"/><circle cx="68" cy="103" r="4.500" fill="${SKIN}"/></g>
+    <ellipse cx="50" cy="69" rx="15" ry="7" fill="#332d3a"/>
+    <path d="M36 72Q50 66 64 72L65 105Q50 109 35 105Z" fill="#4c4455" stroke="#6b6176" stroke-width="1"/>
+    <path d="M41 94H59L61 103H39Z" fill="#3d3645"/>
+    <path d="M47 73V82M53 73V82" stroke="#d8cfc4" stroke-width="1.500" stroke-linecap="round"/>
+    <path d="M36 78Q22 88 8 98" stroke="#463e4e" stroke-width="7.500" stroke-linecap="round" fill="none"/>
+    ${timmHeadSize(TIMM_HEAD)}
   </g>
 </g>`;
 
@@ -231,16 +230,16 @@ function winterScene() {
 
       <g transform="translate(356 94) scale(-.72 .72)"><g class="w-body" style="--phase:-1.4s">
         ${boots('#d8c7a8', '#262a38')}
-        <path d="M27 72Q50 64 73 72L78 112Q50 118 22 112Z" fill="#27527a" stroke="#3a6c99" stroke-width="1"/>
-        <path d="M26 86Q50 91 74 86M25 100Q50 105 75 100" stroke="#1c3f60" stroke-width="2.2" fill="none"/>
-        <path d="M50 70V114" stroke="#e6a93a" stroke-width="2"/>
-        <path d="M67 78Q75 88 73 100" stroke="#20466a" stroke-width="11" stroke-linecap="round" fill="none"/><circle cx="73" cy="103" r="6.5" fill="#e6a93a"/>
-        <rect x="35" y="60" width="30" height="14" rx="7" fill="#e6a93a"/>
-        <path d="M58 70L64 94H54Z" fill="#cf9328"/>
-        ${TIMM_HEAD}
+        <path d="M33 72Q50 66 67 72L70 110Q50 115 30 110Z" fill="#27527a" stroke="#3a6c99" stroke-width="1"/>
+        <path d="M32 86Q50 90 68 86M31 99Q50 103 69 99" stroke="#1c3f60" stroke-width="2" fill="none"/>
+        <path d="M50 70V112" stroke="#e6a93a" stroke-width="2"/>
+        <path d="M64 78Q70 88 69 100" stroke="#20466a" stroke-width="9" stroke-linecap="round" fill="none"/><circle cx="69" cy="103" r="5.500" fill="#e6a93a"/>
+        <rect x="38" y="61" width="24" height="12" rx="6" fill="#e6a93a"/>
+        <path d="M56 70L61 92H52Z" fill="#cf9328"/>
+        ${timmHeadSize(`${TIMM_HEAD}
         <path d="M22 30Q25 0 50 0Q75 0 78 30Q50 20 22 30Z" fill="#1f8fa6"/>
         <path d="M21 30Q50 20 79 30" stroke="#17758a" stroke-width="9" stroke-linecap="round" fill="none"/>
-        <path d="M32 27V33M42 24V30M52 24V30M62 25V31M70 28V34" stroke="#4fb4c8" stroke-width="1.8"/>
+        <path d="M32 27V33M42 24V30M52 24V30M62 25V31M70 28V34" stroke="#4fb4c8" stroke-width="1.8"/>`)}
         ${throwArm('#20466a', '#e6a93a')}
       </g></g>
 
@@ -253,7 +252,7 @@ function winterScene() {
 }
 
 // ---------- Strand-Szene für die Sommerliste ----------
-const beachArm = (cls, x1, x2, x3, sleeve) => `<g class="v-arm ${cls}"><path d="M${x1} 78Q${x2} 88 ${x3} 100" stroke="${sleeve}" stroke-width="10" stroke-linecap="round" fill="none"/><circle cx="${x3}" cy="104" r="5" fill="${SKIN}"/></g>`;
+const beachArm = (cls, x1, x2, x3, sleeve, width = 10) => `<g class="v-arm ${cls}"><path d="M${x1} 78Q${x2} 88 ${x3} 100" stroke="${sleeve}" stroke-width="${width}" stroke-linecap="round" fill="none"/><circle cx="${x3}" cy="${width > 8 ? 104 : 102}" r="${width > 8 ? 5 : 4}" fill="${SKIN}"/></g>`;
 const BEACH_LEGS = `
     <rect x="37" y="100" width="12" height="28" rx="6" fill="${SKIN}"/><ellipse cx="44" cy="129" rx="8" ry="4" fill="${SKIN}"/>
     <rect x="51" y="100" width="12" height="28" rx="6" fill="${SKIN}"/><ellipse cx="58" cy="129" rx="8" ry="4" fill="${SKIN}"/>`;
@@ -273,16 +272,16 @@ const BEACH_FENJA = `
         ${SHADES_FENJA}`;
 
 const BEACH_TIMM = `
-        ${beachArm('far', 60, 66, 65, SKIN)}
-        ${BEACH_LEGS}
-        <rect x="44" y="60" width="12" height="14" rx="5" fill="#f2c9a8"/>
-        <path d="M31 72Q50 66 69 72L72 104Q50 108 28 104Z" fill="#2f7fb0"/>
-        <path d="M43 69Q50 75 57 69" stroke="#f2c9a8" stroke-width="3.500" fill="none"/>
-        <path d="M28 103H72L74 119H54L50 113L46 119H26Z" fill="#2c3a55"/>
-        ${beachArm('near', 67, 72, 71, SKIN)}
-        <path d="M61 72Q68 72 72 79L66 84Q62 80 60 79Z" fill="#2f7fb0"/>
-        ${TIMM_FACE}${TIMM_TOUSLED_HAIR}
-        ${SHADES_TIMM}`;
+        ${beachArm('far', 58, 62, 61, SKIN, 7)}
+        <rect x="40" y="108" width="9" height="20" rx="4.500" fill="${SKIN}"/><ellipse cx="44.500" cy="129" rx="7" ry="3.500" fill="${SKIN}"/>
+        <rect x="51" y="108" width="9" height="20" rx="4.500" fill="${SKIN}"/><ellipse cx="55.500" cy="129" rx="7" ry="3.500" fill="${SKIN}"/>
+        <rect x="45" y="60" width="10" height="14" rx="4" fill="#f2c9a8"/>
+        <path d="M36 72Q50 67 64 72L65 104Q50 108 35 104Z" fill="#2f7fb0"/>
+        <path d="M44 69.500Q50 74 56 69.500" stroke="#f2c9a8" stroke-width="3" fill="none"/>
+        <path d="M35 103H65L66 116H52.500L50 111L47.500 116H34Z" fill="#2c3a55"/>
+        ${beachArm('near', 63, 67, 66, SKIN, 7)}
+        <path d="M58 72Q64 72 68 78L63 83Q60 79 58 78Z" fill="#2f7fb0"/>
+        ${timmHeadSize(`${TIMM_FACE}${TIMM_TOUSLED_HAIR}${SHADES_TIMM}`)}`;
 
 // Weiß mit blauen Feldern und roten Streifen
 const VOLLEYBALL = `
