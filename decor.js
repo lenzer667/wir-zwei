@@ -52,13 +52,14 @@ const FENJA_BRAIDED_HEAD = `${FENJA_FACE}
     <path d="M50 8C33 6 21 17 20 38C25 27 36 19 50 16C64 19 75 27 80 38C79 17 67 6 50 8Z" fill="#54291a"/>
     <path d="M46 10C37 11 29 17 26 26M54 10C63 11 71 17 74 26M50 8V16" stroke="#7a3a1e" stroke-width="1.800" stroke-linecap="round" fill="none"/>`;
 
-// Timm: nur ein Hauch Bart am Kiefer und ein kleiner Schatten am Kinn
+// Timm: kleiner Schnauzer und einzelne Barthaare an den Seiten und am Kinn
 const TIMM_FACE = `
     <path d="M22 40Q17 42 19 49Q21 54 25 53ZM78 40Q83 42 81 49Q79 54 75 53Z" fill="#f2c9a8"/>
     <path d="M25 34C25 15 75 15 75 34C75 53 64 67 50 67C36 67 25 53 25 34Z" fill="#f9d7bb"/>
-    <path d="M28 50C31 60 40 67 50 67C60 67 69 60 72 50C68 58 60 62.500 50 62.500C40 62.500 32 58 28 50Z" fill="#6b4a36" opacity=".2"/>
-    <path d="M45 62Q50 60.500 55 62Q54 65.500 50 66Q46 65.500 45 62Z" fill="#5a3b2a" opacity=".32"/>
-    <path d="M44 55.500Q50 59 56 55.500" stroke="#8c4a3e" stroke-width="2" stroke-linecap="round" fill="none"/>`;
+    <path d="M27 47l.6 2.400M28.600 46.500l.5 2.600M28.400 50l.9 2.400M30 49.800l.8 2.600M30 53l1.200 2.200M31.800 52.600l1 2.400M32.200 56l1.600 1.800M34.200 55.400l1.200 2.200M35.600 58.600l1.800 1.400M73 47l-.6 2.400M71.400 46.500l-.5 2.600M71.600 50l-.9 2.400M70 49.800l-.8 2.600M70 53l-1.200 2.200M68.200 52.600l-1 2.400M67.800 56l-1.600 1.800M65.800 55.400l-1.200 2.200M64.400 58.600l-1.800 1.400" stroke="#5a3b2a" stroke-width=".8" stroke-linecap="round"/>
+    <path d="M43.500 61.500l.6 1.900M45.500 62l.4 2.400M47 61.300l.3 2M48.500 62.600l.2 2.600M50 61.800v2.100M51.500 62.600l-.2 2.600M53 61.300l-.3 2M54.500 62l-.4 2.400M56.500 61.500l-.6 1.900M46.500 65l.5 1M50 65.300v1.200M53.500 65l-.5 1" stroke="#5a3b2a" stroke-width=".8" stroke-linecap="round"/>
+    <path d="M44 53.200Q47 51 50 52.200Q53 51 56 53.200Q53 54.200 50 53.500Q47 54.200 44 53.200Z" fill="#4a2e20"/>
+    <path d="M45 56Q50 59 55 56" stroke="#8c4a3e" stroke-width="2" stroke-linecap="round" fill="none"/>`;
 
 const TIMM_BROWS = `
     <path d="M31 33Q38 29 46 32M54 32Q62 29 69 33" stroke="#2b1a14" stroke-width="3" stroke-linecap="round" fill="none"/>`;
