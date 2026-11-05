@@ -1019,6 +1019,37 @@ body[data-list='summer'] #app { padding-top: calc(14px + env(safe-area-inset-top
 .login input { margin-bottom: 6px; }
 .login .btn { margin-top: 4px; }
 .login-error { min-height: 20px; color: #ff9fb2; font-size: 14px; }
+/* ---------- Wünsche für die App ---------- */
+.wish-hint {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--amber);
+  border-radius: 18px;
+  background: var(--surface);
+  text-align: left;
+}
+.wish-hint strong, .wish-hint small { display: block; }
+.wish-hint small { color: var(--muted); }
+.wish-hint-star { font-size: 23px; line-height: 1; }
+.wish-back { align-self: flex-start; min-height: 40px; color: var(--muted); font-weight: 600; }
+.wish-form { gap: 8px; }
+.wish-form textarea { margin-bottom: 0; }
+.wish { position: relative; gap: 7px; }
+.wish-text { padding-right: 26px; overflow-wrap: anywhere; white-space: pre-wrap; }
+.sheet .wish-text { padding-right: 0; }
+.wish-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.wish-tag { padding: 2px 9px; border-radius: 8px; font-size: 12px; font-weight: 700; }
+.wish-tag.open { background: #5a4632; color: #ffd9a8; }
+.wish-tag.doing { background: #274a5c; color: #bfe6f7; }
+.wish-tag.done { background: #2c5236; color: #c5efcf; }
+.wish-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+.wish-actions button { min-height: 38px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); color: var(--muted); font-size: 13px; font-weight: 600; }
+.wish-actions button.on { border-color: var(--amber); color: var(--text); }
+.wish-del { position: absolute; top: 3px; right: 3px; width: 40px; height: 40px; color: var(--muted); font-size: 14px; }
+
 .welcome-couple { width: 170px; align-self: center; margin-bottom: 6px; }
 .welcome .glow { inset: 0 0 auto; }
 

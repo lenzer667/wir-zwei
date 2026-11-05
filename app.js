@@ -83,7 +83,10 @@ async function enterApp() {
   }
   seedSuggestions();
   render();
-  if (me) celebrateMilestoneOnce();
+  if (me) {
+    celebrateMilestoneOnce();
+    noticeWishes();
+  }
 }
 
 // ---------- Icons ----------
@@ -147,6 +150,8 @@ function viewHome() {
       </div>
       <div class="bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
     </section>
+
+    ${wishHint()}
 
     ${viewNotes()}
 
@@ -455,6 +460,73 @@ function viewBucket() {
   `;
 }
 
+// ---------- Wünsche für die App ----------
+const WISH_STATUS = { open: 'Offen', doing: 'In Arbeit', done: 'Erfüllt' };
+
+const unseenWishes = () => DB.list('wishes').filter((w) => w.by !== me && !w.seen);
+
+function wishHint() {
+  const fresh = unseenWishes();
+  if (!fresh.length) return '';
+  const who = esc(fresh[0].by);
+  return `
+    <button class="wish-hint" data-action="open-wishes">
+      <span class="wish-hint-star" aria-hidden="true">✨</span>
+      <span><strong>${fresh.length === 1 ? `${who} hat einen neuen Wunsch` : `${who} hat ${fresh.length} neue Wünsche`}</strong><small>Antippen zum Lesen</small></span>
+    </button>`;
+}
+
+function viewWishes() {
+  const wishes = DB.list('wishes').sort((a, b) => b.at - a.at);
+  const canManage = me === COUPLE.people[0];
+  return `
+    <header class="page-head">
+      <button class="wish-back" data-action="nav" data-to="home">← Zurück</button>
+      <h1>Wünsche für die App</h1>
+      <p class="muted">Was soll noch besser werden?</p>
+    </header>
+
+    <form class="card wish-form" data-form="wish">
+      <label class="sr" for="wish-text">Dein Wunsch</label>
+      <textarea id="wish-text" name="text" rows="3" maxlength="400" required placeholder="Schreib einfach drauflos"></textarea>
+      <button class="btn primary wide">Abschicken</button>
+    </form>
+
+    ${wishes.length ? `<ul class="list">${wishes.map((w) => `
+      <li class="card wish">
+        <p class="wish-text">${esc(w.text)}</p>
+        <div class="wish-meta">
+          <small class="muted">${esc(w.by)}, ${fmtShort(w.at)}</small>
+          <span class="wish-tag ${esc(w.status)}">${esc(WISH_STATUS[w.status] || 'Offen')}</span>
+        </div>
+        ${canManage ? `<div class="wish-actions">
+          ${Object.entries(WISH_STATUS).map(([key, label]) => `<button class="${w.status === key ? 'on' : ''}" data-action="wish-status" data-id="${esc(w.id)}" data-to="${key}" aria-pressed="${w.status === key}">${label}</button>`).join('')}
+        </div>` : ''}
+        ${canManage || w.by === me ? `<button class="wish-del" data-action="wish-remove" data-id="${esc(w.id)}" aria-label="Wunsch löschen">✕</button>` : ''}
+      </li>`).join('')}</ul>` : '<p class="muted empty-line">Noch keine Wünsche. Was fehlt euch noch?</p>'}
+  `;
+}
+
+// Wer die Seite offen hat, hat neue Wünsche gesehen.
+function markWishesSeen() {
+  unseenWishes().forEach((w) => DB.put('wishes', { ...w, seen: true }));
+}
+
+// Einmalige Freude, wenn der eigene Wunsch umgesetzt wurde.
+function noticeWishes() {
+  if (!Auth.user || !me || $overlay.classList.contains('open')) return;
+  const done = DB.list('wishes').find((w) => w.by === me && w.status === 'done' && !w.noticed);
+  if (!done) return;
+  DB.put('wishes', { ...done, noticed: true });
+  openOverlay(`
+    <div class="sheet center pop">
+      <p class="eyebrow">Dein Wunsch wurde erfüllt ❤️</p>
+      <p class="wish-text">${esc(done.text)}</p>
+      <button class="btn primary wide" data-action="close">Schön</button>
+    </div>`);
+  Decor.hearts(innerWidth / 2, innerHeight / 2 - 60, 10);
+}
+
 // ---------- Spielen ----------
 function viewGame() {
   const games = DB.list('volley').sort((x, y) => y.at - x.at);
@@ -486,7 +558,7 @@ function viewGame() {
 }
 
 // ---------- Rendern ----------
-const VIEWS = { home: viewHome, food: viewFood, movies: viewMovies, bucket: viewBucket, game: viewGame };
+const VIEWS = { home: viewHome, food: viewFood, movies: viewMovies, bucket: viewBucket, game: viewGame, wishes: viewWishes };
 const NAV = [['home', 'Wir'], ['food', 'Essen'], ['movies', 'Filme'], ['bucket', 'Listen'], ['game', 'Spielen']];
 
 function viewLogin() {
@@ -571,6 +643,8 @@ function goto(view) {
 // Nicht neu zeichnen, während jemand tippt, sonst wäre der Text weg.
 let renderPending = false;
 DB.subscribe(() => {
+  if (UI.view === 'wishes' && unseenWishes().length) { markWishesSeen(); return; }
+  noticeWishes();
   const el = document.activeElement;
   if (el && /INPUT|TEXTAREA/.test(el.tagName) && el.type !== 'radio') { renderPending = true; return; }
   render();
@@ -646,6 +720,7 @@ const ACTIONS = {
   'switch-user': () => openOverlay(`
     <div class="sheet center">
       <h2>Hey ${esc(me)}</h2>
+      <button class="btn primary wide" data-action="open-wishes">✨ Wünsche für die App</button>
       <button class="btn ghost wide" data-action="toggle-walkers">${Decor.prefOn() ? 'Laufende Figuren ausblenden' : 'Laufende Figuren einblenden'}</button>
       <button class="btn link" data-action="close">Schließen</button>
     </div>`),
@@ -662,6 +737,18 @@ const ACTIONS = {
     render();
   },
   'game-start': (d) => VolleyGame.start({ mode: d.mode, me, onClose: render }),
+  'open-wishes': () => {
+    closeOverlay();
+    goto('wishes');
+    markWishesSeen();
+  },
+  'wish-status': (d) => {
+    const w = DB.get('wishes', d.id);
+    if (!w) return;
+    // Wird ein Wunsch wieder geöffnet und später erneut erfüllt, gibt es auch wieder die Meldung.
+    DB.put('wishes', { ...w, status: d.to, noticed: d.to === 'done' ? !!w.noticed : false });
+  },
+  'wish-remove': (d) => removeWithUndo('wishes', d.id, (DB.get('wishes', d.id)?.text || '').slice(0, 24)),
   'toggle-walkers': () => { Decor.setPref(!Decor.prefOn()); closeOverlay(); render(); },
   poster: () => openOverlay(`
     <div class="poster-full pop">
@@ -741,6 +828,11 @@ const ACTIONS = {
 };
 
 const FORMS = {
+  wish: (f) => {
+    DB.put('wishes', { id: uid(), text: f.text, by: me, at: Date.now(), status: 'open', seen: false, noticed: false });
+    toast('Dein Wunsch ist angekommen');
+    Decor.hearts(innerWidth / 2, innerHeight / 2, 7, ['✨', '♥']);
+  },
   note: (f) => {
     DB.put('notes', { id: uid(), from: me, to: other(), text: f.text, at: Date.now(), readAt: null });
     toast(`Zettel liegt für ${other()} bereit`);
