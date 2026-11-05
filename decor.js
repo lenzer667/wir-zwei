@@ -52,10 +52,13 @@ const FENJA_BRAIDED_HEAD = `${FENJA_FACE}
     <path d="M50 8C33 6 21 17 20 38C25 27 36 19 50 16C64 19 75 27 80 38C79 17 67 6 50 8Z" fill="#54291a"/>
     <path d="M46 10C37 11 29 17 26 26M54 10C63 11 71 17 74 26M50 8V16" stroke="#7a3a1e" stroke-width="1.800" stroke-linecap="round" fill="none"/>`;
 
-// Timm: Gesicht ohne Bart
+// Timm: Bart nach seiner Skizze, Linie von den Koteletten zum Kinn, Kinnbart und Schnauzer
 const TIMM_FACE = `
     <path d="M22 40Q17 42 19 49Q21 54 25 53ZM78 40Q83 42 81 49Q79 54 75 53Z" fill="#f2c9a8"/>
     <path d="M25 34C25 15 75 15 75 34C75 53 64 67 50 67C36 67 25 53 25 34Z" fill="#f9d7bb"/>
+    <path d="M25 37C25.500 53 38 67.500 50 67.500C62 67.500 74.500 53 75 37L73.200 37C72.200 52 62 64.700 50 64.700C38 64.700 27.800 52 26.800 37Z" fill="#33201a"/>
+    <path d="M43.500 61.500Q50 59.300 56.500 61.500Q58 66 50 68Q42 66 43.500 61.500Z" fill="#33201a"/>
+    <path d="M44 53.500Q47.500 51.500 50 52.500Q52.500 51.500 56 53.500Q52.500 54.400 50 53.800Q47.500 54.400 44 53.500Z" fill="#33201a"/>
     <path d="M45 56.300Q50 59 55 56.300" stroke="#8c4a3e" stroke-width="1.700" stroke-linecap="round" fill="none"/>`;
 
 // Der Kopf ist etwas kleiner als der Körper, damit die Figur nicht so wuchtig wirkt.
