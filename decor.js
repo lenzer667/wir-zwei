@@ -52,13 +52,13 @@ const FENJA_BRAIDED_HEAD = `${FENJA_FACE}
     <path d="M50 8C33 6 21 17 20 38C25 27 36 19 50 16C64 19 75 27 80 38C79 17 67 6 50 8Z" fill="#54291a"/>
     <path d="M46 10C37 11 29 17 26 26M54 10C63 11 71 17 74 26M50 8V16" stroke="#7a3a1e" stroke-width="1.800" stroke-linecap="round" fill="none"/>`;
 
-// Timm: Gesicht mit kurzem, gepflegtem Bart entlang des Kiefers
+// Timm: nur ein Hauch Bart am Kiefer und ein kleiner Schatten am Kinn
 const TIMM_FACE = `
     <path d="M22 40Q17 42 19 49Q21 54 25 53ZM78 40Q83 42 81 49Q79 54 75 53Z" fill="#f2c9a8"/>
     <path d="M25 34C25 15 75 15 75 34C75 53 64 67 50 67C36 67 25 53 25 34Z" fill="#f9d7bb"/>
-    <path d="M26 44C27 58 38 67.500 50 67.500C62 67.500 73 58 74 44C72 50 69 54 65 55C62 52.500 57 51.500 50 52.500C43 51.500 38 52.500 35 55C31 54 28 50 26 44Z" fill="#5a3b2a" opacity=".6"/>
-    <ellipse cx="50" cy="57" rx="8" ry="2.800" fill="#f9d7bb"/>
-    <path d="M44 56.500Q50 60 56 56.500" stroke="#8c4a3e" stroke-width="2" stroke-linecap="round" fill="none"/>`;
+    <path d="M28 50C31 60 40 67 50 67C60 67 69 60 72 50C68 58 60 62.500 50 62.500C40 62.500 32 58 28 50Z" fill="#6b4a36" opacity=".2"/>
+    <path d="M45 62Q50 60.500 55 62Q54 65.500 50 66Q46 65.500 45 62Z" fill="#5a3b2a" opacity=".32"/>
+    <path d="M44 55.500Q50 59 56 55.500" stroke="#8c4a3e" stroke-width="2" stroke-linecap="round" fill="none"/>`;
 
 const TIMM_BROWS = `
     <path d="M31 33Q38 29 46 32M54 32Q62 29 69 33" stroke="#2b1a14" stroke-width="3" stroke-linecap="round" fill="none"/>`;
@@ -272,15 +272,14 @@ const BEACH_FENJA = `
         ${SHADES_FENJA}`;
 
 const BEACH_TIMM = `
-        ${beachArm('far', 60, 66, 65, '#bdb9b3')}
+        ${beachArm('far', 60, 66, 65, SKIN)}
         ${BEACH_LEGS}
-        <ellipse cx="50" cy="68" rx="21" ry="9" fill="#c6c2bc"/>
-        <rect x="44" y="60" width="12" height="12" rx="5" fill="#f2c9a8"/>
-        <path d="M30 72Q50 65 70 72L74 108Q50 113 26 108Z" fill="#dcd9d3" stroke="#bfbbb4" stroke-width="1"/>
-        <path d="M36 95H64L67 106H33Z" fill="#c9c5be"/>
-        <path d="M45 73V83M55 73V83" stroke="#8d8981" stroke-width="1.600" stroke-linecap="round"/>
-        <path d="M28 107H72L74 119H54L50 113L46 119H26Z" fill="#2c3a55"/>
-        ${beachArm('near', 67, 72, 71, '#ccc8c2')}
+        <rect x="44" y="60" width="12" height="14" rx="5" fill="#f2c9a8"/>
+        <path d="M31 72Q50 66 69 72L72 104Q50 108 28 104Z" fill="#2f7fb0"/>
+        <path d="M43 69Q50 75 57 69" stroke="#f2c9a8" stroke-width="3.500" fill="none"/>
+        <path d="M28 103H72L74 119H54L50 113L46 119H26Z" fill="#2c3a55"/>
+        ${beachArm('near', 67, 72, 71, SKIN)}
+        <path d="M61 72Q68 72 72 79L66 84Q62 80 60 79Z" fill="#2f7fb0"/>
         ${TIMM_FACE}${TIMM_TOUSLED_HAIR}
         ${SHADES_TIMM}`;
 
