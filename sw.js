@@ -1,5 +1,5 @@
 // Netzwerk zuerst, damit Updates sofort ankommen. Ohne Internet startet die App aus dem Cache.
-const CACHE = 'wirzwei-v13';
+const CACHE = 'wirzwei-v14';
 const SHELL = ['./', 'index.html', 'styles.css', 'data.js', 'store.js', 'figuren-seite.js', 'decor.js', 'game.js', 'app.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'assets/herbst.jpg'];
 
 self.addEventListener('install', (e) => {
@@ -18,7 +18,8 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.origin !== location.origin) return;
   e.respondWith(
-    fetch(e.request)
+    // no-cache: Der Browser fragt immer beim Server nach, ob es eine neue Version gibt.
+    fetch(e.request, { cache: 'no-cache' })
       .then((res) => {
         const copy = res.clone();
         caches.open(CACHE).then((c) => c.put(e.request, copy));
