@@ -58,8 +58,33 @@ const seedRecs = (season, items) => items.map((item, i) => ({
   text: item.text || item, emoji: item.emoji || null,
   order: i, doneBy: null, doneAt: null,
 }));
-DB.seedOnce('bucket', Object.entries(BUCKET_SEEDS).flatMap(([season, items]) => seedRecs(season, items)));
-DB.addOnce('herbstliste-bild', 'bucket', seedRecs('autumn', BUCKET_SEEDS.autumn));
+function seedSuggestions() {
+  DB.seedOnce('bucket', 'bucket', Object.entries(BUCKET_SEEDS).flatMap(([season, items]) => seedRecs(season, items)));
+}
+
+// Nach dem Login: Daten holen und beim allerersten Mal fragen, ob alte Daten mit sollen.
+async function enterApp() {
+  UI.loading = true;
+  render();
+  await DB.load();
+  UI.loading = false;
+  if (DB.isEmpty() && DB.legacy()) {
+    render();
+    openOverlay(`
+      <div class="sheet center">
+        <h2>Daten übernehmen?</h2>
+        <p class="muted">Auf diesem Gerät liegen Einträge von früher. Sollen sie in eure gemeinsame App?</p>
+        <div class="sheet-actions">
+          <button class="btn ghost" data-action="import-no">Nein</button>
+          <button class="btn primary" data-action="import-yes">Ja, übernehmen</button>
+        </div>
+      </div>`);
+    return;
+  }
+  seedSuggestions();
+  render();
+  if (me) celebrateMilestoneOnce();
+}
 
 // ---------- Icons ----------
 const ICONS = {
@@ -464,6 +489,20 @@ function viewGame() {
 const VIEWS = { home: viewHome, food: viewFood, movies: viewMovies, bucket: viewBucket, game: viewGame };
 const NAV = [['home', 'Wir'], ['food', 'Essen'], ['movies', 'Filme'], ['bucket', 'Listen'], ['game', 'Spielen']];
 
+function viewLogin() {
+  return `
+    <section class="welcome">
+      <div class="glow"></div>
+      ${coupleSVG('welcome-couple')}
+      <h1 class="brand big">Wir zwei</h1>
+      <p class="muted">${esc(UI.loginError || 'Öffne einfach deinen persönlichen Link, dann bist du sofort drin.')}</p>
+    </section>`;
+}
+
+function viewLoading() {
+  return `<section class="welcome"><div class="glow"></div>${coupleSVG('welcome-couple')}<p class="muted">Eure Daten werden geladen …</p></section>`;
+}
+
 function viewWelcome() {
   return `
     <section class="welcome">
@@ -487,9 +526,10 @@ function render() {
   const scene = !me ? '' : UI.view === 'game' ? 'summer' : UI.view === 'bucket' && THEME_COLORS[UI.season] ? UI.season : '';
   document.body.dataset.list = scene;
   document.querySelector('meta[name=theme-color]').content = THEME_COLORS[scene] || '#17100e';
-  Decor.show(!!me && UI.view === 'home');
-  if (!me) {
-    $app.innerHTML = viewWelcome();
+  const signedIn = !!Auth.user && !UI.loading;
+  Decor.show(signedIn && !!me && UI.view === 'home');
+  if (!signedIn || !me) {
+    $app.innerHTML = !Auth.user ? viewLogin() : UI.loading ? viewLoading() : viewWelcome();
     $nav.innerHTML = '';
     $nav.classList.add('hidden');
     return;
@@ -605,12 +645,22 @@ const ACTIONS = {
   'set-user': (d) => { me = d.name; localStorage.setItem(ME_KEY, me); closeOverlay(); UI.enter = true; render(); },
   'switch-user': () => openOverlay(`
     <div class="sheet center">
-      <h2>Wer bist du?</h2>
-      <div class="who">
-        ${COUPLE.people.map((p) => `<button class="who-btn ${p === me ? 'on' : ''}" data-action="set-user" data-name="${esc(p)}"><span class="avatar">${esc(p[0])}</span>${esc(p)}</button>`).join('')}
-      </div>
+      <h2>Hey ${esc(me)}</h2>
       <button class="btn ghost wide" data-action="toggle-walkers">${Decor.prefOn() ? 'Laufende Figuren ausblenden' : 'Laufende Figuren einblenden'}</button>
+      <button class="btn link" data-action="close">Schließen</button>
     </div>`),
+  'import-yes': () => {
+    closeOverlay();
+    DB.importLegacy();
+    seedSuggestions();
+    render();
+    toast('Eure Daten sind übernommen');
+  },
+  'import-no': () => {
+    closeOverlay();
+    seedSuggestions();
+    render();
+  },
   'game-start': (d) => VolleyGame.start({ mode: d.mode, me, onClose: render }),
   'toggle-walkers': () => { Decor.setPref(!Decor.prefOn()); closeOverlay(); render(); },
   poster: () => openOverlay(`
@@ -741,5 +791,30 @@ addEventListener('beforeinstallprompt', (e) => {
 });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 
-render();
-if (me) celebrateMilestoneOnce();
+// Wird ein Link in eine schon offene Seite eingefügt, lädt sie neu und meldet an.
+addEventListener('hashchange', () => location.reload());
+
+// Beim Start: Ist noch jemand angemeldet, geht es direkt in die App.
+(async () => {
+  render();
+  await Auth.restore();
+  // Persönlicher Link, z. B. …/wir-zwei/#fenja-CODE: einmal öffnen genügt, danach bleibt man angemeldet.
+  const link = location.hash.match(/^#(timm|fenja)-([A-Za-z0-9]+)$/);
+  if (link) {
+    history.replaceState(null, '', location.pathname);
+    if (!Auth.user || Auth.person().toLowerCase() !== link[1]) {
+      try {
+        await Auth.signInWithLink(link[1], link[2]);
+      } catch (err) {
+        UI.loginError = 'Dieser Link funktioniert leider nicht.';
+        Auth.user = null;
+      }
+    }
+  }
+  if (Auth.user) {
+    me = Auth.person();
+    await enterApp();
+  } else {
+    render();
+  }
+})();

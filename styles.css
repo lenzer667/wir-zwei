@@ -1014,6 +1014,11 @@ body[data-list='summer'] #app { padding-top: calc(14px + env(safe-area-inset-top
   100% { transform: rotate(530deg); }
 }
 
+.login { display: flex; flex-direction: column; gap: 6px; width: 100%; margin-top: 12px; text-align: left; }
+.login label { color: var(--muted); font-size: 14px; }
+.login input { margin-bottom: 6px; }
+.login .btn { margin-top: 4px; }
+.login-error { min-height: 20px; color: #ff9fb2; font-size: 14px; }
 .welcome-couple { width: 170px; align-self: center; margin-bottom: 6px; }
 .welcome .glow { inset: 0 0 auto; }
 
