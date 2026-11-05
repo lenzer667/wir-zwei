@@ -53,13 +53,16 @@ const FENJA_BRAIDED_HEAD = `${FENJA_FACE}
     <path d="M46 10C37 11 29 17 26 26M54 10C63 11 71 17 74 26M50 8V16" stroke="#7a3a1e" stroke-width="1.800" stroke-linecap="round" fill="none"/>`;
 
 // Timm: Bart nach seiner Skizze, Linie von den Koteletten zum Kinn, Kinnbart und Schnauzer
-const TIMM_FACE = `
+const TIMM_SKIN = `
     <path d="M22 40Q17 42 19 49Q21 54 25 53ZM78 40Q83 42 81 49Q79 54 75 53Z" fill="#f2c9a8"/>
-    <path d="M25 34C25 15 75 15 75 34C75 53 64 67 50 67C36 67 25 53 25 34Z" fill="#f9d7bb"/>
+    <path d="M25 34C25 15 75 15 75 34C75 53 64 67 50 67C36 67 25 53 25 34Z" fill="#f9d7bb"/>`;
+const TIMM_MOUTH = `
+    <path d="M45 56.300Q50 59 55 56.300" stroke="#8c4a3e" stroke-width="1.700" stroke-linecap="round" fill="none"/>`;
+const TIMM_FACE = `${TIMM_SKIN}
     <path d="M25 37C25.500 53 38 67.500 50 67.500C62 67.500 74.500 53 75 37L73.200 37C72.200 52 62 64.700 50 64.700C38 64.700 27.800 52 26.800 37Z" fill="#33201a"/>
     <path d="M43.500 61.500Q50 59.300 56.500 61.500Q58 66 50 68Q42 66 43.500 61.500Z" fill="#33201a"/>
     <path d="M44 53.500Q47.500 51.500 50 52.500Q52.500 51.500 56 53.500Q52.500 54.400 50 53.800Q47.500 54.400 44 53.500Z" fill="#33201a"/>
-    <path d="M45 56.300Q50 59 55 56.300" stroke="#8c4a3e" stroke-width="1.700" stroke-linecap="round" fill="none"/>`;
+    ${TIMM_MOUTH}`;
 
 // Der Kopf ist etwas kleiner als der Körper, damit die Figur nicht so wuchtig wirkt.
 const timmHeadSize = (inner) => `<g transform="translate(6 8) scale(.88)">${inner}</g>`;
@@ -122,11 +125,7 @@ const TIMM_SVG = `
 </g>`;
 
 function coupleSVG(cls = '') {
-  return `<svg class="couple ${cls}" viewBox="0 -12 184 156" aria-hidden="true">
-    ${FENJA_SVG}${TIMM_SVG}
-    <circle cx="92" cy="94" r="6" fill="${SKIN}"/>
-    <path class="clasp" d="M92 78C88 72 81 74 83 81C84 84 88 87 92 90C96 87 100 84 101 81C103 74 96 72 92 78Z" fill="#ff5f82"/>
-  </svg>`;
+  return sideCouple(cls);
 }
 
 const CATS = {
@@ -214,37 +213,9 @@ function winterScene() {
       <ellipse cx="80" cy="192" rx="24" ry="4" fill="#6e93b5" opacity=".3"/>
       <ellipse cx="320" cy="192" rx="24" ry="4" fill="#6e93b5" opacity=".3"/>
 
-      <g transform="translate(44 94) scale(.72)"><g class="w-body">
-        ${FENJA_BACK_HAIR}
-        ${boots('#f3e3c8', '#3c3550')}
-        <path d="M28 72Q50 64 72 72L76 110Q50 116 24 110Z" fill="#c8364f"/>
-        <path d="M27 84Q50 89 73 84M26 97Q50 102 74 97" stroke="#a42540" stroke-width="2" fill="none"/>
-        <path d="M50 70V112" stroke="#a42540" stroke-width="1.6"/>
-        <path d="M66 78Q74 88 72 100" stroke="#b22d47" stroke-width="11" stroke-linecap="round" fill="none"/><circle cx="72" cy="103" r="6.5" fill="#f3e3c8"/>
-        <rect x="36" y="60" width="28" height="14" rx="7" fill="#f3e3c8"/>
-        <path d="M58 70L63 92H54Z" fill="#e9d3af"/>
-        ${FENJA_HEAD}
-        <path d="M22 30Q25 3 50 3Q75 3 78 30Q50 19 22 30Z" fill="#d6455d"/>
-        <path d="M34 8L32 25M50 4V21M66 8L68 25" stroke="#a42540" stroke-width="2.2"/>
-        <path d="M21 31Q50 19 79 31" stroke="#f3e3c8" stroke-width="8" stroke-linecap="round" fill="none"/>
-        <circle cx="50" cy="2" r="9" fill="#f3e3c8"/>
-        ${throwArm('#b22d47', '#f3e3c8')}
-      </g></g>
+      <g transform="translate(-71.400 89.400) scale(.2)"><g class="w-body-s" style="transform-origin:757px 503px">${sidePose('fenja', 'winter', 'w-arm-s')}</g></g>
 
-      <g transform="translate(356 94) scale(-.72 .72)"><g class="w-body" style="--phase:-1.4s">
-        ${boots('#d8c7a8', '#262a38')}
-        <path d="M33 72Q50 66 67 72L70 110Q50 115 30 110Z" fill="#27527a" stroke="#3a6c99" stroke-width="1"/>
-        <path d="M32 86Q50 90 68 86M31 99Q50 103 69 99" stroke="#1c3f60" stroke-width="2" fill="none"/>
-        <path d="M50 70V112" stroke="#e6a93a" stroke-width="2"/>
-        <path d="M64 78Q70 88 69 100" stroke="#20466a" stroke-width="9" stroke-linecap="round" fill="none"/><circle cx="69" cy="103" r="5.500" fill="#e6a93a"/>
-        <rect x="38" y="61" width="24" height="12" rx="6" fill="#e6a93a"/>
-        <path d="M56 70L61 92H52Z" fill="#cf9328"/>
-        ${timmHeadSize(`${TIMM_HEAD}
-        <path d="M22 30Q25 0 50 0Q75 0 78 30Q50 20 22 30Z" fill="#1f8fa6"/>
-        <path d="M21 30Q50 20 79 30" stroke="#17758a" stroke-width="9" stroke-linecap="round" fill="none"/>
-        <path d="M32 27V33M42 24V30M52 24V30M62 25V31M70 28V34" stroke="#4fb4c8" stroke-width="1.8"/>`)}
-        ${throwArm('#20466a', '#e6a93a')}
-      </g></g>
+      <g transform="translate(470 -12.400) scale(-.2 .2)"><g class="w-body-s" style="--phase:-1.4s;transform-origin:752px 1012px">${sidePose('timm', 'winter', 'w-arm-s')}</g></g>
 
       <g>${throwBall}</g>
       <g transform="translate(400 0) scale(-1 1)" style="--phase:-1.4s">${throwBall}</g>
@@ -255,36 +226,9 @@ function winterScene() {
 }
 
 // ---------- Strand-Szene für die Sommerliste ----------
-const beachArm = (cls, x1, x2, x3, sleeve, width = 10) => `<g class="v-arm ${cls}"><path d="M${x1} 78Q${x2} 88 ${x3} 100" stroke="${sleeve}" stroke-width="${width}" stroke-linecap="round" fill="none"/><circle cx="${x3}" cy="${width > 8 ? 104 : 102}" r="${width > 8 ? 5 : 4}" fill="${SKIN}"/></g>`;
-const BEACH_LEGS = `
-    <rect x="37" y="100" width="12" height="28" rx="6" fill="${SKIN}"/><ellipse cx="44" cy="129" rx="8" ry="4" fill="${SKIN}"/>
-    <rect x="51" y="100" width="12" height="28" rx="6" fill="${SKIN}"/><ellipse cx="58" cy="129" rx="8" ry="4" fill="${SKIN}"/>`;
-
 // Die Strand-Figuren, auch fürs Volleyball-Spiel
-const BEACH_FENJA = `
-        ${FENJA_BRAIDS_BACK}
-        ${beachArm('far', 60, 66, 65, '#141214')}
-        ${BEACH_LEGS}
-        <rect x="44" y="60" width="12" height="14" rx="5" fill="${SKIN}"/>
-        <path d="M31 72Q50 65 69 72L72 104Q50 108 28 104Z" fill="#232025"/>
-        <path d="M43 68Q50 73 57 68" stroke="#3b373d" stroke-width="2.500" fill="none"/>
-        <path d="M29 103H71L72 113H54L50 108L46 113H28Z" fill="#17151a"/>
-        ${FENJA_BRAIDS}
-        ${beachArm('near', 67, 72, 71, '#2e2a30')}
-        ${FENJA_BRAIDED_HEAD}
-        ${SHADES_FENJA}`;
-
-const BEACH_TIMM = `
-        ${beachArm('far', 58, 62, 61, SKIN, 7)}
-        <rect x="40" y="108" width="9" height="20" rx="4.500" fill="${SKIN}"/><ellipse cx="44.500" cy="129" rx="7" ry="3.500" fill="${SKIN}"/>
-        <rect x="51" y="108" width="9" height="20" rx="4.500" fill="${SKIN}"/><ellipse cx="55.500" cy="129" rx="7" ry="3.500" fill="${SKIN}"/>
-        <rect x="45" y="60" width="10" height="14" rx="4" fill="#f2c9a8"/>
-        <path d="M36 72Q50 67 64 72L65 104Q50 108 35 104Z" fill="#2f7fb0"/>
-        <path d="M44 69.500Q50 74 56 69.500" stroke="#f2c9a8" stroke-width="3" fill="none"/>
-        <path d="M35 103H65L66 116H52.500L50 111L47.500 116H34Z" fill="#2c3a55"/>
-        ${beachArm('near', 63, 67, 66, SKIN, 7)}
-        <path d="M58 72Q64 72 68 78L63 83Q60 79 58 78Z" fill="#2f7fb0"/>
-        ${timmHeadSize(`${TIMM_FACE}${TIMM_TOUSLED_HAIR}${SHADES_TIMM}`)}`;
+const BEACH_FENJA = sidePose('fenja', 'beach', 'g-arm');
+const BEACH_TIMM = sidePose('timm', 'beach', 'g-arm');
 
 // Weiß mit blauen Feldern und roten Streifen
 const VOLLEYBALL = `
@@ -329,9 +273,9 @@ function beachScene() {
       <ellipse cx="80" cy="192" rx="24" ry="4" fill="#000" opacity=".15"/>
       <ellipse cx="320" cy="192" rx="24" ry="4" fill="#000" opacity=".15"/>
 
-      <g transform="translate(44 94) scale(.72)"><g class="v-body">${BEACH_FENJA}</g></g>
+      <g transform="translate(-71.400 89.400) scale(.2)"><g class="v-body-s">${BEACH_FENJA}</g></g>
 
-      <g transform="translate(356 94) scale(-.72 .72)"><g class="v-body" style="--phase:-1.4s">${BEACH_TIMM}</g></g>
+      <g transform="translate(470 -12.400) scale(-.2 .2)"><g class="v-body-s" style="--phase:-1.4s">${BEACH_TIMM}</g></g>
 
       <g class="ball-x"><ellipse class="ball-shadow" cy="197" rx="10" ry="2.4" fill="#000" opacity=".16"/></g>
       <g class="ball-x"><g class="ball-y"><g class="ball-spin">${VOLLEYBALL}</g></g></g>
@@ -403,7 +347,7 @@ const Decor = (() => {
   walkers.id = 'walkers';
   walkers.setAttribute('aria-hidden', 'true');
   walkers.innerHTML = `<div class="walk-inner">
-    ${catSVG('light', 'c3')}${catSVG('grey', 'c1')}${coupleSVG()}
+    ${catSVG('light', 'c3')}${catSVG('grey', 'c1')}${sideCouple()}
   </div>`;
   // Die Bühne schneidet alles außerhalb des Bildschirms ab, sonst zoomen Handys die Seite heraus.
   const stage = document.createElement('div');

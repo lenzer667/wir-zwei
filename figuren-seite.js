@@ -1,0 +1,109 @@
+// Timm und Fenja von der Seite. Alle Teile liegen in den Koordinaten des Originalbilds.
+const SIDE_PARTS = {
+  fenja: {
+    y0: 8, foot: 503, body: [620, 8, 225, 316], leg: [705, 300, 135, 205], hip: [757, 318],
+    arm: [90, 186, 140, 62], armPivot: [222, 216], shoulder: [752, 212],
+    sleeve: `<path d="M226 193L184 193Q178 216 184 240L226 240Z" fill="#2a2525" stroke="#120e0d" stroke-width="4" stroke-linejoin="round"/>`,
+  },
+  timm: {
+    y0: 512, foot: 1012, body: [630, 512, 230, 320], leg: [700, 812, 130, 205], hip: [752, 828],
+    arm: [102, 692, 150, 74], armPivot: [244, 722], shoulder: [758, 722],
+    sleeve: '',
+  },
+};
+
+function sideImage(who, name, [x, y, w, h]) {
+  return `<image href="assets/figuren/${who}-side-${name}.png" x="${x}" y="${y}" width="${w}" height="${h}"/>`;
+}
+
+function sideLeg(who, name, cls) {
+  const p = SIDE_PARTS[who];
+  return `<g class="sp-part ${cls}" style="--r:0deg;--amp:24deg;transform-origin:${p.hip[0]}px ${p.hip[1]}px">${sideImage(who, name, p.leg)}</g>`;
+}
+
+// Der Arm liegt im Bild waagerecht. Er wird an die Schulter gesetzt und von dort aus gedreht.
+function sideArm(who, name, cls, rot, amp, extra = '') {
+  const p = SIDE_PARTS[who];
+  const dx = p.shoulder[0] - p.armPivot[0];
+  const dy = p.shoulder[1] - p.armPivot[1];
+  return `<g transform="translate(${dx} ${dy})"><g class="sp-part ${cls}" style="--r:${rot}deg;--amp:${amp}deg;transform-origin:${p.armPivot[0]}px ${p.armPivot[1]}px">${sideImage(who, name, p.arm)}${p.sleeve}${extra}</g></g>`;
+}
+
+const SIDE_LINE = 'stroke="#17100d" stroke-width="5" stroke-linejoin="round"';
+
+// Kleidung für die Seitenansicht, über die Bilder gezeichnet
+const SIDE_WEAR = {
+  fenja: {
+    winter: {
+      sleeve: `<path d="M228 192L128 198Q112 205 112 218Q112 232 128 240L228 242Z" fill="#b22d47" ${SIDE_LINE}/><ellipse cx="108" cy="220" rx="16" ry="21" fill="#f3e3c8" ${SIDE_LINE}/>`,
+      body: `<path d="M720 196Q760 180 806 196L814 310Q765 322 714 310Z" fill="#c8364f" ${SIDE_LINE}/>
+        <path d="M718 245Q765 257 810 245M716 285Q765 297 812 285" stroke="#a42540" stroke-width="5" fill="none"/>`,
+      head: `<path d="M736 172Q770 190 804 170L808 200Q770 216 732 200Z" fill="#f3e3c8" ${SIDE_LINE}/>
+        <path d="M648 112Q652 10 752 12Q824 14 832 84Q740 58 648 112Z" fill="#d6455d" ${SIDE_LINE}/>
+        <path d="M644 118Q738 58 836 86L832 108Q740 84 650 140Z" fill="#f3e3c8" ${SIDE_LINE}/>
+        <circle cx="668" cy="34" r="26" fill="#f3e3c8" ${SIDE_LINE}/>`,
+    },
+    beach: {
+      head: `<defs><linearGradient id="lens-side" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2b62d9"/><stop offset=".6" stop-color="#27d2b5"/><stop offset="1" stop-color="#d9365f"/></linearGradient></defs>
+        <path d="M744 114L824 108Q834 110 830 126L820 148Q802 156 784 148L760 130L744 127Z" fill="url(#lens-side)" ${SIDE_LINE}/>`,
+    },
+  },
+  timm: {
+    winter: {
+      sleeve: `<path d="M252 696L128 706Q110 712 110 726Q110 742 128 748L252 758Z" fill="#20466a" ${SIDE_LINE}/><ellipse cx="106" cy="727" rx="16" ry="21" fill="#e6a93a" ${SIDE_LINE}/>`,
+      body: `<path d="M714 704Q760 690 808 704L814 820Q760 832 708 820Z" fill="#27527a" ${SIDE_LINE}/>
+        <path d="M712 752Q760 764 810 752M710 792Q760 804 812 792" stroke="#1c3f60" stroke-width="5" fill="none"/>`,
+      head: `<path d="M734 690Q770 708 806 688L810 716Q770 732 730 716Z" fill="#e6a93a" ${SIDE_LINE}/>
+        <path d="M648 610Q650 510 752 512Q842 514 850 590Q750 556 648 610Z" fill="#1f8fa6" ${SIDE_LINE}/>
+        <path d="M642 616Q748 554 854 592L850 616Q750 582 650 640Z" fill="#17758a" ${SIDE_LINE}/>`,
+    },
+    beach: {
+      head: `<path d="M738 622L838 616Q848 620 842 640L832 666Q812 676 790 662L764 642L738 636Z" fill="#15171c" ${SIDE_LINE}/>
+        <path d="M790 628L822 626L806 650Z" fill="#fff" opacity=".14"/>`,
+    },
+  },
+};
+
+// Fertige Pose fürs Spiel und die Szenen: Beine stehen, nur der vordere Arm bewegt sich.
+function sidePose(who, outfit, armCls) {
+  const wear = SIDE_WEAR[who][outfit] || {};
+  const ball = armCls === 'w-arm-s' ? `<circle class="hand-ball" cx="${who === 'fenja' ? 84 : 84}" cy="${who === 'fenja' ? 220 : 727}" r="26" fill="#fff" stroke="#b7d6ee" stroke-width="4"/>` : '';
+  return `
+    ${sideArm(who, 'arm-back', '', -84, 0, wear.sleeve || '')}
+    ${sideLeg(who, 'leg-back', 'sp-b')}
+    ${sideLeg(who, 'leg', 'sp-a')}
+    ${sideImage(who, 'body', SIDE_PARTS[who].body)}
+    ${wear.body || ''}
+    ${wear.head || ''}
+    ${sideArm(who, 'arm', armCls, -95, 0, (wear.sleeve || '') + ball)}`;
+}
+
+// Figur im Profil, schaut nach rechts: hinterer Arm und Bein liegen hinter dem Körper.
+function sideFigure(who, { backArm, frontArm }) {
+  const p = SIDE_PARTS[who];
+  return `<g class="sp-bob">
+    ${backArm}
+    ${sideLeg(who, 'leg-back', 'sp-b')}
+    ${sideLeg(who, 'leg', 'sp-a')}
+    ${sideImage(who, 'body', p.body)}
+    ${frontArm}
+  </g>`;
+}
+
+// Hand in Hand: Timm geht vorne, Fenja dahinter. Timm liegt im Bild tiefer, deshalb wird er hochgezogen.
+function sideCouple(cls = '') {
+  const liftTimm = SIDE_PARTS.fenja.foot - SIDE_PARTS.timm.foot;
+  return `<svg class="couple sprite-couple ${cls}" viewBox="590 -5 510 530" aria-hidden="true">
+    <ellipse cx="760" cy="505" rx="62" ry="8" fill="#000" opacity=".22"/>
+    <ellipse cx="955" cy="505" rx="62" ry="8" fill="#000" opacity=".22"/>
+    ${sideFigure('fenja', {
+      backArm: sideArm('fenja', 'arm-back', 'sp-a', -84, 26),
+      frontArm: sideArm('fenja', 'arm', 'sp-a', -140, 3),
+    })}
+    <g transform="translate(195 ${liftTimm})">${sideFigure('timm', {
+      backArm: sideArm('timm', 'arm-back', 'sp-b', -40, 3),
+      frontArm: sideArm('timm', 'arm', 'sp-b', -84, 26),
+    })}</g>
+    <path class="clasp" d="M868 248C858 232 836 238 842 258C845 268 857 277 868 285C879 277 891 268 894 258C900 238 878 232 868 248Z" fill="#ff5f82"/>
+  </svg>`;
+}

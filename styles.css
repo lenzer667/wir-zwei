@@ -965,6 +965,55 @@ body[data-list='summer'] #app { padding-top: calc(14px + env(safe-area-inset-top
 #nav svg { width: 20px; height: 20px; }
 #toast { bottom: calc(66px + env(safe-area-inset-bottom)); }
 
+/* ---------- Figuren aus Bildern ---------- */
+.sp-part { transform-box: view-box; transform: rotate(var(--r, 0deg)); }
+.walking .sp-a { animation: sp-swing 0.55s ease-in-out infinite alternate; }
+.walking .sp-b { animation: sp-swing 0.55s ease-in-out infinite alternate-reverse; }
+.walking .sp-bob { animation: sp-bob 0.275s ease-in-out infinite alternate; }
+@keyframes sp-swing {
+  from { transform: rotate(calc(var(--r, 0deg) - var(--amp, 0deg))); }
+  to { transform: rotate(calc(var(--r, 0deg) + var(--amp, 0deg))); }
+}
+@keyframes sp-bob { to { transform: translateY(-7px); } }
+.happy .sp-bob { animation: sp-hop 0.5s ease-in-out infinite alternate; }
+.happy .sp-bob + g .sp-bob { animation-delay: -0.25s; }
+@keyframes sp-hop { to { transform: translateY(-40px); } }
+.walk-inner .couple.sprite-couple { width: 76px; }
+.walk-inner .c1, .walk-inner .c3 { margin-bottom: 2px; }
+#walk-stage { height: 84px; }
+
+/* Volleyball: Sprung und Arm beim Ballkontakt */
+.v-body-s { animation: v-jump-s 2.8s infinite; animation-delay: calc(var(--sync) + var(--phase, 0s)); }
+.v-body-s .g-arm { animation: v-arm-s 2.8s infinite; animation-delay: calc(var(--sync) + var(--phase, 0s)); }
+@keyframes v-jump-s {
+  0%, 100% { transform: translateY(-70px); }
+  14%, 82% { transform: translateY(0); }
+  90% { transform: translateY(-20px); }
+}
+@keyframes v-arm-s {
+  0%, 100% { transform: rotate(-205deg); }
+  16%, 76% { transform: rotate(-100deg); }
+  90% { transform: rotate(-190deg); }
+}
+.g-player .g-arm { transition: transform 0.1s; }
+.g-player.hit .g-arm { transform: rotate(-205deg); }
+
+/* Schneeballschlacht: Wurf und Treffer */
+.w-body-s { transform-box: view-box; animation: w-body-s 2.8s infinite; animation-delay: calc(var(--sync) + var(--phase, 0s)); }
+.w-arm-s { animation: w-arm-s 2.8s infinite ease-in-out; animation-delay: calc(var(--sync) + var(--phase, 0s)); }
+@keyframes w-body-s {
+  0%, 100% { transform: translate(25px, -25px) rotate(7deg); }
+  10%, 80% { transform: none; }
+  84% { transform: translate(-55px, -15px) rotate(-10deg); }
+  92% { transform: translate(-10px, 0) rotate(-3deg); }
+}
+@keyframes w-arm-s {
+  0% { transform: rotate(170deg); }
+  12%, 86% { transform: rotate(260deg); }
+  95% { transform: rotate(390deg); }
+  100% { transform: rotate(530deg); }
+}
+
 .welcome-couple { width: 170px; align-self: center; margin-bottom: 6px; }
 .welcome .glow { inset: 0 0 auto; }
 

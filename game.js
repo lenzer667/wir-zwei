@@ -158,10 +158,12 @@ const VolleyGame = (() => {
   // ---------- Darstellung ----------
   function paint() {
     const { a, b, ball } = s;
-    s.elA.setAttribute('transform', `translate(${(a.x - 36).toFixed(1)} ${(a.y - 96).toFixed(1)}) scale(.72)`);
-    s.elB.setAttribute('transform', `translate(${(b.x + 36).toFixed(1)} ${(b.y - 96).toFixed(1)}) scale(-.72 .72)`);
+    s.elA.setAttribute('transform', `translate(${(a.x - 151.4).toFixed(1)} ${(a.y - 100.6).toFixed(1)}) scale(.2)`);
+    s.elB.setAttribute('transform', `translate(${(b.x + 150.4).toFixed(1)} ${(b.y - 202.4).toFixed(1)}) scale(-.2 .2)`);
     s.elA.classList.toggle('hit', a.hitTimer > 0);
     s.elB.classList.toggle('hit', b.hitTimer > 0);
+    s.elA.classList.toggle('walking', a.vx !== 0 && a.y >= GROUND);
+    s.elB.classList.toggle('walking', b.vx !== 0 && b.y >= GROUND);
     s.shA.setAttribute('cx', a.x.toFixed(1));
     s.shB.setAttribute('cx', b.x.toFixed(1));
     s.elBall.setAttribute('transform', `translate(${ball.x.toFixed(1)} ${ball.y.toFixed(1)}) scale(1.09)`);
