@@ -67,6 +67,14 @@ function sideArm(who, name, cls, rot, amp, extra = '') {
 }
 
 const SIDE_LINE = 'stroke="#17100d" stroke-width="5" stroke-linejoin="round"';
+const SIDE_SKIN = '#fbcfa8';
+
+// Bein mit kurzer Hose: nackte Haut, darüber die Hose, unten die Schuhe aus dem Bild
+function bareLeg(who, wear, back, cls) {
+  const p = SIDE_PARTS[who];
+  return `<g class="sp-part ${cls}" style="--r:0deg;--amp:24deg;transform-origin:${p.hip[0]}px ${p.hip[1]}px">
+    ${wear.leg(back)}${sideImage(who, back ? 'shoe-back' : 'shoe', wear.shoe)}${wear.shorts(back)}</g>`;
+}
 
 // Kleidung für die Seitenansicht, über die Bilder gezeichnet
 const SIDE_WEAR = {
@@ -81,6 +89,13 @@ const SIDE_WEAR = {
         <circle cx="668" cy="34" r="26" fill="#f3e3c8" ${SIDE_LINE}/>`,
     },
     beach: {
+      shoe: [705, 471, 135, 34],
+      leg: (back) => `<path d="M733 392L729 472Q757 482 783 472L780 392Z" fill="${back ? '#d9b393' : SIDE_SKIN}" ${SIDE_LINE}/>`,
+      shorts: (back) => `<path d="M716 312H800L807 402Q772 410 757 401Q744 410 709 402Z" fill="${back ? '#1c2a44' : '#2c3a5e'}" ${SIDE_LINE}/>`,
+      sleeve: `<path d="M230 194Q192 188 190 216Q192 242 230 238Z" fill="#ff6f61" ${SIDE_LINE}/>`,
+      body: `<path d="M720 196Q760 182 806 196L812 316Q765 326 714 316Z" fill="#ff6f61" ${SIDE_LINE}/>
+        <path d="M717 262Q765 274 809 262" stroke="#fff" stroke-width="9" fill="none"/>
+        <path d="M714 314Q765 324 812 314L816 332Q765 342 710 332Z" fill="#2c3a5e" ${SIDE_LINE}/>`,
       head: `<defs><linearGradient id="lens-side" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2b62d9"/><stop offset=".6" stop-color="#27d2b5"/><stop offset="1" stop-color="#d9365f"/></linearGradient></defs>
         <path d="M744 114L824 108Q834 110 830 126L820 148Q802 156 784 148L760 130L744 127Z" fill="url(#lens-side)" ${SIDE_LINE}/>`,
     },
@@ -95,6 +110,13 @@ const SIDE_WEAR = {
         <path d="M642 616Q748 554 854 592L850 616Q750 582 650 640Z" fill="#17758a" ${SIDE_LINE}/>`,
     },
     beach: {
+      shoe: [700, 981, 130, 36],
+      leg: (back) => `<path d="M728 898L724 985Q752 995 782 985L778 898Z" fill="${back ? '#d9b393' : SIDE_SKIN}" ${SIDE_LINE}/>`,
+      shorts: (back) => `<path d="M712 822H796L803 908Q768 916 752 907Q738 916 705 908Z" fill="${back ? '#124a5c' : '#1a6a82'}" ${SIDE_LINE}/>`,
+      sleeve: `<path d="M254 700Q212 692 210 726Q212 758 254 752Z" fill="#2f9fc0" ${SIDE_LINE}/>`,
+      body: `<path d="M714 704Q760 692 808 704L814 826Q760 836 708 826Z" fill="#2f9fc0" ${SIDE_LINE}/>
+        <path d="M712 766Q760 778 811 766" stroke="#fff" stroke-width="9" fill="none"/>
+        <path d="M708 824Q760 834 814 824L818 842Q760 852 704 842Z" fill="#1a6a82" ${SIDE_LINE}/>`,
       head: `<path d="M738 622L838 616Q848 620 842 640L832 666Q812 676 790 662L764 642L738 636Z" fill="#15171c" ${SIDE_LINE}/>
         <path d="M790 628L822 626L806 650Z" fill="#fff" opacity=".14"/>`,
     },
@@ -107,8 +129,8 @@ function sidePose(who, outfit, armCls) {
   const ball = armCls === 'w-arm-s' ? `<circle class="hand-ball" cx="${who === 'fenja' ? 84 : 84}" cy="${who === 'fenja' ? 220 : 727}" r="26" fill="#fff" stroke="#b7d6ee" stroke-width="4"/>` : '';
   return `
     ${sideArm(who, 'arm-back', '', -84, 0, wear.sleeve || '')}
-    ${sideLeg(who, 'leg-back', 'sp-b')}
-    ${sideLeg(who, 'leg', 'sp-a')}
+    ${wear.leg ? bareLeg(who, wear, true, 'sp-b') : sideLeg(who, 'leg-back', 'sp-b')}
+    ${wear.leg ? bareLeg(who, wear, false, 'sp-a') : sideLeg(who, 'leg', 'sp-a')}
     ${sideImage(who, 'body', SIDE_PARTS[who].body)}
     ${wear.body || ''}
     ${wear.head || ''}
