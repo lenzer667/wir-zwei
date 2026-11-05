@@ -42,24 +42,39 @@ const FENJA_LOCKS = `
 
 const FENJA_HEAD = `${FENJA_FACE}${FENJA_TOP}${FENJA_LOCKS}`;
 
-// Zöpfe beim Volleyball
-const fenjaBraid = (x, dark, light) => [50, 58, 66, 74, 82].map((y, i) =>
-  `<ellipse cx="${x + (i % 2 ? 2 : -2)}" cy="${y}" rx="7" ry="5.500" fill="${i % 2 ? light : dark}"/>`).join('')
-  + `<rect x="${x - 5}" y="87" width="10" height="4" rx="2" fill="#2fc4c9"/><path d="M${x - 5} 91Q${x} 101 ${x + 5} 91Z" fill="${dark}"/>`;
-const FENJA_BRAIDS_BACK = `<circle cx="50" cy="29" r="29" fill="#54291a"/>`;
-const FENJA_BRAIDED_HEAD = `${FENJA_FACE}${FENJA_TOP}${fenjaBraid(17, '#5f2f1c', '#7a3a1e')}${fenjaBraid(83, '#8a4120', '#a84f22')}`;
+// Beim Volleyball: straff zurückgebundene Haare und zwei dünne Zöpfe vor den Schultern
+const fenjaBraid = (x, drift) => [64, 69.500, 75, 80.500, 86, 91.500].map((y, i) =>
+  `<ellipse cx="${(x + drift * i + (i % 2 ? 1.300 : -1.300)).toFixed(1)}" cy="${y}" rx="3.800" ry="3.600" fill="${i % 2 ? '#7a3a1e' : '#54291a'}"/>`).join('')
+  + `<path d="M${x + drift * 6 - 2.500} 95Q${x + drift * 6} 102 ${x + drift * 6 + 2.500} 95Z" fill="#54291a"/>`;
+const FENJA_BRAIDS_BACK = `<circle cx="50" cy="30" r="28" fill="#4a2418"/>`;
+const FENJA_BRAIDS = `${fenjaBraid(31, -0.500)}${fenjaBraid(69, 0.500)}`;
+const FENJA_BRAIDED_HEAD = `${FENJA_FACE}
+    <path d="M50 8C33 6 21 17 20 38C25 27 36 19 50 16C64 19 75 27 80 38C79 17 67 6 50 8Z" fill="#54291a"/>
+    <path d="M46 10C37 11 29 17 26 26M54 10C63 11 71 17 74 26M50 8V16" stroke="#7a3a1e" stroke-width="1.800" stroke-linecap="round" fill="none"/>`;
 
-// Timm: nach hinten gestylte Haare, eckige dunkle Brille, Oberlippen- und Kinnbart
-const TIMM_HEAD = `
+// Timm: Gesicht mit kurzem, gepflegtem Bart entlang des Kiefers
+const TIMM_FACE = `
     <path d="M22 40Q17 42 19 49Q21 54 25 53ZM78 40Q83 42 81 49Q79 54 75 53Z" fill="#f2c9a8"/>
     <path d="M25 34C25 15 75 15 75 34C75 53 64 67 50 67C36 67 25 53 25 34Z" fill="#f9d7bb"/>
-    <path d="M26 45C28 58 39 67 50 67C61 67 72 58 74 45C72 52 66 58 60 59Q50 56 40 59C34 58 28 52 26 45Z" fill="#5a3b2a" opacity=".24"/>
-    <path d="M41 53Q46 50 50 51.500Q54 50 59 53Q54 54 50 53.200Q46 54 41 53Z" fill="#4a2e20"/>
-    <path d="M43 61Q50 59 57 61Q56 67 50 67.500Q44 67 43 61Z" fill="#4a2e20"/>
+    <path d="M26 44C27 58 38 67.500 50 67.500C62 67.500 73 58 74 44C72 50 69 54 65 55C62 52.500 57 51.500 50 52.500C43 51.500 38 52.500 35 55C31 54 28 50 26 44Z" fill="#5a3b2a" opacity=".6"/>
+    <ellipse cx="50" cy="57" rx="8" ry="2.800" fill="#f9d7bb"/>
+    <path d="M44 56.500Q50 60 56 56.500" stroke="#8c4a3e" stroke-width="2" stroke-linecap="round" fill="none"/>`;
+
+const TIMM_BROWS = `
+    <path d="M31 33Q38 29 46 32M54 32Q62 29 69 33" stroke="#2b1a14" stroke-width="3" stroke-linecap="round" fill="none"/>`;
+
+// Sonst: nach hinten gestylt
+const TIMM_SLICK_HAIR = `
     <path d="M24 39C20 30 22 19 28 13C36 2 56 -4 70 4C81 9 83 24 77 39C76 33 74 28 72 25C61 28 45 22 33 23C29 27 26 32 24 39Z" fill="#33201a"/>
     <path d="M30 20C39 8 56 3 72 12M35 23C45 13 59 11 75 20M45 24C53 18 62 18 72 24" stroke="#5e4131" stroke-width="2.400" stroke-linecap="round" fill="none"/>
-    <path d="M24 39C24 33 25 29 28 25M77 39C77 33 76 29 73 25" stroke="#4a3226" stroke-width="3" stroke-linecap="round" fill="none"/>
-    <path d="M31 33Q38 29 46 32M54 32Q62 29 69 33" stroke="#2b1a14" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <path d="M24 39C24 33 25 29 28 25M77 39C77 33 76 29 73 25" stroke="#4a3226" stroke-width="3" stroke-linecap="round" fill="none"/>`;
+
+// Beim Volleyball: vom Wind zerzaust
+const TIMM_TOUSLED_HAIR = `
+    <path d="M22 40C16 31 17 18 25 11C31 3 46 -3 58 2C70 -2 84 8 83 20C88 28 84 37 78 42C77 35 74 30 69 27C66 31 59 29 55 26C50 31 42 29 38 25C33 27 27 32 22 40Z" fill="#33201a"/>
+    <path d="M28 21C33 11 44 7 54 9M58 8C67 8 75 14 78 24M34 25C39 18 47 16 53 19M58 16C65 16 70 20 73 26" stroke="#5e4131" stroke-width="2.400" stroke-linecap="round" fill="none"/>`;
+
+const TIMM_HEAD = `${TIMM_FACE}${TIMM_SLICK_HAIR}${TIMM_BROWS}
     <g class="eyes">
       <ellipse cx="39" cy="42" rx="4.800" ry="5.200" fill="#fff"/><ellipse cx="61" cy="42" rx="4.800" ry="5.200" fill="#fff"/>
       <ellipse cx="39.500" cy="42.300" rx="3.900" ry="4.600" fill="#5e3a1f"/><ellipse cx="60.500" cy="42.300" rx="3.900" ry="4.600" fill="#5e3a1f"/>
@@ -69,8 +84,7 @@ const TIMM_HEAD = `
     <g fill="#fff" fill-opacity=".1" stroke="#1d1411" stroke-width="2.800">
       <rect x="28" y="35" width="22" height="15" rx="2.500"/><rect x="50" y="35" width="22" height="15" rx="2.500"/>
     </g>
-    <path d="M28 39L23 38M72 39L77 38" stroke="#1d1411" stroke-width="2.800" stroke-linecap="round"/>
-    <path d="M44 56.500Q50 60 56 56.500" stroke="#8c4a3e" stroke-width="2" stroke-linecap="round" fill="none"/>`;
+    <path d="M28 39L23 38M72 39L77 38" stroke="#1d1411" stroke-width="2.800" stroke-linecap="round"/>`;
 
 const FENJA_SVG = `
 <g class="ch">
@@ -137,12 +151,17 @@ function catInner(kind) {
     <path d="M38 23L33 22M38 26L33 27M58 23L62 22M58 26L62 27" stroke="#f3ece3" stroke-width=".8" opacity=".7"/>`;
 }
 
-// Sonnenbrille mit dunklen Gläsern und kleinem Glanz
-function shades(rim, x1, x2) {
-  const lens = (x) => `<rect x="${x}" y="32" width="22" height="20" rx="7" fill="#12161f" stroke="${rim}" stroke-width="2.6"/>
-    <path d="M${x + 5} 45L${x + 13} 36M${x + 10} 47L${x + 17} 39" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".55"/>`;
-  return `${lens(x1)}${lens(x2)}<path d="M${x1 + 22} 39Q${(x1 + 22 + x2) / 2} 36 ${x2} 39" stroke="${rim}" stroke-width="2.6" fill="none"/>`;
-}
+// Einteilige Sportbrille wie auf eurem Foto
+const SPORT_LENS = 'M24 33H76Q79 33 78 37L74 49Q71 54 63 53L56 48Q50 44 44 48L37 53Q29 54 26 49L22 37Q21 33 24 33Z';
+const SHADES_FENJA = `
+    <defs><linearGradient id="lens-f" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#d9365f"/><stop offset=".18" stop-color="#2b62d9"/><stop offset=".5" stop-color="#27d2b5"/><stop offset=".82" stop-color="#2146a8"/><stop offset="1" stop-color="#d9365f"/></linearGradient></defs>
+    <path d="M23 37L20 38M77 37L80 38" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+    <path d="${SPORT_LENS}" fill="url(#lens-f)" stroke="#101215" stroke-width="1.800" stroke-linejoin="round"/>
+    <path d="M30 37L37 37L32 45ZM63 37L71 37L68 42Z" fill="#fff" opacity=".28"/>`;
+const SHADES_TIMM = `
+    <path d="M23 37L20 38M77 37L80 38" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+    <path d="${SPORT_LENS}" fill="#15171c" stroke="#08090b" stroke-width="1.800" stroke-linejoin="round"/>
+    <path d="M30 37L38 37L33 45ZM64 37L71 37L68 42Z" fill="#fff" opacity=".14"/>`;
 
 // ---------- Schnee-Szene für die Winterliste ----------
 function winterScene() {
@@ -233,7 +252,7 @@ function winterScene() {
 }
 
 // ---------- Strand-Szene für die Sommerliste ----------
-const beachArm = (cls, x1, x2, x3) => `<g class="v-arm ${cls}"><path d="M${x1} 78Q${x2} 88 ${x3} 100" stroke="${SKIN}" stroke-width="9" stroke-linecap="round" fill="none"/><circle cx="${x3}" cy="103" r="5" fill="${SKIN}"/></g>`;
+const beachArm = (cls, x1, x2, x3, sleeve) => `<g class="v-arm ${cls}"><path d="M${x1} 78Q${x2} 88 ${x3} 100" stroke="${sleeve}" stroke-width="10" stroke-linecap="round" fill="none"/><circle cx="${x3}" cy="104" r="5" fill="${SKIN}"/></g>`;
 const BEACH_LEGS = `
     <rect x="37" y="100" width="12" height="28" rx="6" fill="${SKIN}"/><ellipse cx="44" cy="129" rx="8" ry="4" fill="${SKIN}"/>
     <rect x="51" y="100" width="12" height="28" rx="6" fill="${SKIN}"/><ellipse cx="58" cy="129" rx="8" ry="4" fill="${SKIN}"/>`;
@@ -241,41 +260,44 @@ const BEACH_LEGS = `
 // Die Strand-Figuren, auch fürs Volleyball-Spiel
 const BEACH_FENJA = `
         ${FENJA_BRAIDS_BACK}
-        ${beachArm('far', 60, 66, 65)}
+        ${beachArm('far', 60, 66, 65, '#141214')}
         ${BEACH_LEGS}
         <rect x="44" y="60" width="12" height="14" rx="5" fill="${SKIN}"/>
-        <path d="M35 72Q50 66 65 72L69 100H31Z" fill="#ff6f61"/>
-        <path d="M33 88H67" stroke="#fff" stroke-width="3" opacity=".85"/>
-        <path d="M30 98H70L72 112H53L50 106L47 112H28Z" fill="#159fb0"/>
-        ${beachArm('near', 67, 72, 71)}
+        <path d="M31 72Q50 65 69 72L72 104Q50 108 28 104Z" fill="#232025"/>
+        <path d="M43 68Q50 73 57 68" stroke="#3b373d" stroke-width="2.500" fill="none"/>
+        <path d="M29 103H71L72 113H54L50 108L46 113H28Z" fill="#17151a"/>
+        ${FENJA_BRAIDS}
+        ${beachArm('near', 67, 72, 71, '#2e2a30')}
         ${FENJA_BRAIDED_HEAD}
-        <path d="M24 31Q50 17 76 31" stroke="#2fc4c9" stroke-width="5" stroke-linecap="round" fill="none"/>
-        ${shades('#ff7d92', 27, 51)}`;
+        ${SHADES_FENJA}`;
 
 const BEACH_TIMM = `
-        ${beachArm('far', 60, 66, 65)}
+        ${beachArm('far', 60, 66, 65, '#bdb9b3')}
         ${BEACH_LEGS}
-        <rect x="44" y="60" width="12" height="14" rx="5" fill="#f2c9a8"/>
-        <path d="M34 72Q50 66 66 72L69 100H31Z" fill="#1f8fa6"/>
-        <path d="M44 68Q50 76 56 68" stroke="#f9d7bb" stroke-width="4" fill="none"/>
-        <path d="M30 98H70L73 118H53L50 108L47 118H27Z" fill="#ff9f1c"/>
-        <path d="M34 106V116M66 106V116" stroke="#fff" stroke-width="2.5"/>
-        ${beachArm('near', 67, 72, 71)}
-        ${TIMM_HEAD}
-        ${shades('#0b0d12', 28, 50)}`;
+        <ellipse cx="50" cy="68" rx="21" ry="9" fill="#c6c2bc"/>
+        <rect x="44" y="60" width="12" height="12" rx="5" fill="#f2c9a8"/>
+        <path d="M30 72Q50 65 70 72L74 108Q50 113 26 108Z" fill="#dcd9d3" stroke="#bfbbb4" stroke-width="1"/>
+        <path d="M36 95H64L67 106H33Z" fill="#c9c5be"/>
+        <path d="M45 73V83M55 73V83" stroke="#8d8981" stroke-width="1.600" stroke-linecap="round"/>
+        <path d="M28 107H72L74 119H54L50 113L46 119H26Z" fill="#2c3a55"/>
+        ${beachArm('near', 67, 72, 71, '#ccc8c2')}
+        ${TIMM_FACE}${TIMM_TOUSLED_HAIR}
+        ${SHADES_TIMM}`;
 
+// Weiß mit blauen Feldern und roten Streifen
 const VOLLEYBALL = `
-        <circle r="11" fill="#fff" stroke="#27566b" stroke-width="1.4"/>
-        <path d="M-10 -3Q0 -9 10 -4M-9 5Q2 2 8 -8M-3 10Q-2 0 -7 -8M4 10Q8 3 11 2" stroke="#27566b" stroke-width="1.2" fill="none"/>
-        <path d="M-10 -3Q0 -9 10 -4Q8 -11 0 -11Q-7 -10 -10 -3Z" fill="#ffc83d"/>
-        <path d="M-3 10Q-2 3 4 10Q0 11.5 -3 10Z" fill="#27a6d9"/>`;
+        <circle r="11" fill="#f7f4ec"/>
+        <path d="M-10.500 -3Q0 -9 10.500 -3.500Q8 -11 0 -11Q-8 -10.500 -10.500 -3Z" fill="#35577f"/>
+        <path d="M-8 7.500Q-3 1 -8.500 -6.500Q-11.500 0 -8 7.500ZM2 10.700Q6 4 10.500 3.500Q8 9 2 10.700Z" fill="#35577f"/>
+        <path d="M-9.500 -2.500Q0 -6.500 10 -1.500M-3 10.500Q0 3 8 -7" stroke="#d43d4f" stroke-width="1.500" fill="none"/>
+        <circle r="11" fill="none" stroke="#27405f" stroke-width="1.300"/>`;
 
 function beachScene() {
   // Alle Animationen hängen an derselben Uhr, damit der Ball beim Neuzeichnen nicht springt.
   const sync = -((performance.now() / 1000) % 2.8);
 
   return `<figure class="beach-scene" style="--sync:${sync.toFixed(3)}s">
-    <svg viewBox="0 0 400 220" role="img" aria-label="Timm und Fenja spielen mit Sonnenbrillen Beachvolleyball">
+    <svg viewBox="0 0 400 220" role="img" aria-label="Timm und Fenja spielen mit Sportbrillen Beachvolleyball">
       <defs>
         <linearGradient id="b-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5ccbf0"/><stop offset="1" stop-color="#c9f2f7"/></linearGradient>
         <linearGradient id="b-sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1fb6c9"/><stop offset="1" stop-color="#6fe0d4"/></linearGradient>
