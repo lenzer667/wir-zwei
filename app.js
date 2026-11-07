@@ -229,6 +229,11 @@ function viewFood() {
       <p class="muted">Wischt beide durch. Rechts heißt ja, links heißt nein.</p>
     </header>
 
+    <button class="pick-btn" data-action="food-random">
+      <span>🎲</span>
+      <span><strong>Zufallsgericht</strong><small>Eins aus allen ${allDishes().length} Gerichten</small></span>
+    </button>
+
     ${deck.length ? `
       <div class="deck" id="deck">
         ${stack.map((d, i) => {
@@ -329,6 +334,36 @@ function showMatch(d) {
       <button class="btn primary wide" data-action="close">Weiterwischen</button>
     </div>`);
   confetti();
+}
+
+// Würfelt aus allen Gerichten, egal ob gewischt oder nicht.
+function foodRandom() {
+  const dishes = allDishes();
+  if (!dishes.length) return;
+  openOverlay(`
+    <div class="sheet center">
+      <p class="eyebrow">Heute gibt's</p>
+      <span class="big-emoji" id="dish-emoji">🎲</span>
+      <p class="slot" id="slot"></p>
+      <div class="sheet-actions hidden" id="slot-actions">
+        <button class="btn ghost" data-action="food-random">Nochmal</button>
+        <button class="btn primary" data-action="close">Passt!</button>
+      </div>
+    </div>`);
+  const slot = document.getElementById('slot');
+  const emoji = document.getElementById('dish-emoji');
+  const winner = dishes[Math.floor(Math.random() * dishes.length)];
+  const show = (d) => { slot.textContent = d.name; emoji.textContent = d.emoji; };
+  const finish = () => {
+    show(winner);
+    slot.classList.add('landed');
+    document.getElementById('slot-actions').classList.remove('hidden');
+    Decor.hearts(innerWidth / 2, innerHeight / 2 - 40, 6, ['✨', '♥']);
+  };
+  if (reducedMotion() || dishes.length === 1) return finish();
+  let i = Math.floor(Math.random() * dishes.length);
+  const timer = setInterval(() => show(dishes[i++ % dishes.length]), 80);
+  setTimeout(() => { clearInterval(timer); finish(); }, 1300);
 }
 
 // ---------- Filme ----------
@@ -852,6 +887,7 @@ const ACTIONS = {
     const card = $app.querySelector('.dish.top');
     if (card) flyOut(card, d.like === '1');
   },
+  'food-random': foodRandom,
   'food-pick': () => {
     const m = foodMatches();
     if (!m.length) return;
