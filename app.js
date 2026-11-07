@@ -51,7 +51,11 @@ function seasonEnd(date) {
 const ME_KEY = 'wirzwei.me';
 let me = localStorage.getItem(ME_KEY);
 const other = () => COUPLE.people.find((p) => p !== me);
-const UI = { view: 'home', season: seasonOf(today()), movieFilter: 'open', noteSent: false, enter: true };
+const UI = {
+  view: 'home', season: seasonOf(today()), movieFilter: 'open', noteSent: false, enter: true,
+  calMonth: new Date(today().getFullYear(), today().getMonth(), 1),
+  calDay: `${today().getFullYear()}-${String(today().getMonth() + 1).padStart(2, '0')}-${String(today().getDate()).padStart(2, '0')}`,
+};
 
 const seedRecs = (season, items) => items.map((item, i) => ({
   id: `seed-${season}-${i}`, season,
@@ -99,6 +103,7 @@ const ICONS = {
   food: '<path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M17 3c-2.5 1-4 3.6-4 7 0 2 1.2 3 4 3m0-10v18"/>',
   movies: '<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M8 5v14M16 5v14M3 10h5M3 14h5M16 10h5M16 14h5"/>',
   bucket: '<path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1.2 1.2L7 4.8M3.5 12l1.2 1.2L7 10.8M3.5 18l1.2 1.2L7 16.8"/>',
+  calendar: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
   game: '<circle cx="12" cy="12" r="9"/><path d="M12 3c-1 4 0 7 3 9s6 2 6 2M12 12c-3 1-6 4-6.5 6.5M12 12c-2-3-5.500-4-8.500-3"/>',
 };
 const icon = (n) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
@@ -374,6 +379,8 @@ function viewMovies() {
   const list = UI.movieFilter === 'open' ? open : seen;
 
   return `
+    ${listSwitch('movies')}
+
     <header class="page-head">
       <h1>Filmabend</h1>
       <p class="muted">Sammelt, was ihr schauen wollt. Den Rest entscheidet der Zufall.</p>
@@ -451,6 +458,8 @@ function viewBucket() {
   const daysLeft = dayDiff(now, seasonEnd(now));
 
   return `
+    ${listSwitch('bucket')}
+
     <header class="page-head">
       <h1>Bucket Lists</h1>
       <p class="muted">Für jede Jahreszeit eine eigene.</p>
@@ -499,6 +508,138 @@ function viewBucket() {
       <button class="btn primary">Dazu</button>
     </form>
   `;
+}
+
+// ---------- Kalender ----------
+// Timm grün, Fenja rot, gemeinsame Zeit halb und halb mit Herz.
+const CAL_ICONS = [
+  ['', 'Keins'], ['🏐', 'Volleyball'], ['🎓', 'Uni'], ['💼', 'Arbeit'], ['🏋️', 'Sport'],
+  ['🎉', 'Party'], ['✈️', 'Reise'], ['🩺', 'Arzt'], ['🎂', 'Geburtstag'], ['🐱', 'Katzen'],
+];
+const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+
+const isoDay = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const fromIso = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const ownerClass = (o) => (o === COUPLE.people[0] ? 'timm' : o === COUPLE.people[1] ? 'fenja' : 'both');
+const ownerLabel = (o) => (o === 'both' ? 'Zusammen' : o);
+
+const HEART_SPLIT = `<svg class="heart-split" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="heart-split" x1="0" x2="1"><stop offset=".5" style="stop-color:var(--timm)"/><stop offset=".5" style="stop-color:var(--fenja)"/></linearGradient></defs><path d="M12 21C5.5 16.5 3 13 3 9.5 3 7 5 5 7.4 5c1.9 0 3.5 1 4.6 3 1.1-2 2.7-3 4.6-3C19 5 21 7 21 9.5c0 3.5-2.5 7-9 11.5Z" fill="url(#heart-split)"/></svg>`;
+
+// Alle Termine eines Tages, auch wöchentlich wiederholte.
+function eventsOn(dayIso) {
+  const day = fromIso(dayIso);
+  return DB.list('events').filter((e) => {
+    if (e.date === dayIso) return true;
+    if (e.repeat !== 'weekly' || e.date > dayIso) return false;
+    return fromIso(e.date).getDay() === day.getDay();
+  }).sort((a, b) => (b.allDay - a.allDay) || String(a.start).localeCompare(String(b.start)));
+}
+
+const eventTime = (e) => (e.allDay ? 'Ganztägig' : e.end ? `${e.start}–${e.end}` : `ab ${e.start}`);
+
+function calBadge(e) {
+  const cls = ownerClass(e.owner);
+  if (cls === 'both' && !e.icon) return `<span class="cal-ic heart">${HEART_SPLIT}</span>`;
+  if (!e.icon) return '';
+  return `<span class="cal-ic ${cls}">${esc(e.icon)}</span>`;
+}
+
+function viewCalendar() {
+  const month = UI.calMonth;
+  const todayIso = isoDay(today());
+  const first = new Date(month.getFullYear(), month.getMonth(), 1);
+  const offset = (first.getDay() + 6) % 7; // Woche beginnt am Montag
+  const cells = Array.from({ length: 42 }, (_, i) => new Date(month.getFullYear(), month.getMonth(), 1 - offset + i));
+  const lastRowUsed = cells.slice(35).some((d) => d.getMonth() === month.getMonth());
+  const shown = lastRowUsed ? cells : cells.slice(0, 35);
+  const selected = UI.calDay;
+  const dayEvents = eventsOn(selected);
+
+  return `
+    <header class="page-head">
+      <h1>Kalender</h1>
+      <p class="muted cal-legend"><span class="dot timm"></span>Timm <span class="dot fenja"></span>Fenja <span class="legend-heart">${HEART_SPLIT}</span>Zusammen</p>
+    </header>
+
+    <section class="card cal">
+      <div class="cal-head">
+        <button class="cal-nav" data-action="cal-month" data-to="-1" aria-label="Vorheriger Monat">‹</button>
+        <h2>${month.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}</h2>
+        <button class="cal-nav" data-action="cal-month" data-to="1" aria-label="Nächster Monat">›</button>
+      </div>
+      <div class="cal-grid">
+        ${WEEKDAYS.map((w) => `<span class="cal-wd">${w}</span>`).join('')}
+        ${shown.map((d) => {
+          const iso = isoDay(d);
+          const evs = eventsOn(iso);
+          const badges = [...new Set(evs.map(calBadge).filter(Boolean))];
+          const dots = evs.filter((e) => !calBadge(e)).map((e) => `<i class="${ownerClass(e.owner)}"></i>`).slice(0, 4).join('');
+          return `<button class="cal-day ${d.getMonth() !== month.getMonth() ? 'other' : ''} ${iso === todayIso ? 'today' : ''} ${iso === selected ? 'sel' : ''}" data-action="cal-day" data-to="${iso}" aria-label="${d.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}, ${evs.length} Termine">
+            <span class="cal-icons">${badges.slice(0, 2).join('')}${badges.length > 2 ? '<b>+</b>' : ''}</span>
+            <span class="cal-num">${d.getDate()}</span>
+            <span class="cal-dots">${dots}</span>
+          </button>`;
+        }).join('')}
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="row">
+        <h2>${fromIso(selected).toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}</h2>
+        <button class="btn primary small" data-action="cal-add">+ Termin</button>
+      </div>
+      ${dayEvents.length ? `<ul class="list">${dayEvents.map((e) => `
+        <li class="item cal-event ${ownerClass(e.owner)}">
+          <span class="cal-bar" aria-hidden="true"></span>
+          <span class="cal-event-ic" aria-hidden="true">${ownerClass(e.owner) === 'both' && !e.icon ? HEART_SPLIT : esc(e.icon || '')}</span>
+          <div class="item-body"><strong>${esc(e.title)}</strong><small>${eventTime(e)} · ${esc(ownerLabel(e.owner))}${e.repeat === 'weekly' ? ' · jede Woche' : ''}</small></div>
+          <button class="del" data-action="cal-remove" data-id="${esc(e.id)}" aria-label="${esc(e.title)} löschen">✕</button>
+        </li>`).join('')}</ul>` : '<p class="muted empty-line">Noch nichts eingetragen.</p>'}
+    </section>
+  `;
+}
+
+function calForm() {
+  const others = COUPLE.people.filter((p) => p !== me);
+  const owners = [[me, 'Ich'], ...others.map((p) => [p, p]), ['both', 'Zusammen']];
+  openOverlay(`
+    <form class="sheet cal-form" data-form="event">
+      <h2>Neuer Termin</h2>
+      <label for="ev-title">Was?</label>
+      <input id="ev-title" name="title" maxlength="60" required placeholder="z. B. Volleyball-Training" autocomplete="off">
+
+      <span class="cal-label">Für wen?</span>
+      <div class="seg cal-owner">
+        ${owners.map(([v, l], i) => `<label><input type="radio" name="owner" value="${esc(v)}" ${i === 0 ? 'checked' : ''}><span class="${ownerClass(v)}">${esc(l)}</span></label>`).join('')}
+      </div>
+
+      <label for="ev-date">Tag</label>
+      <input id="ev-date" name="date" type="date" required value="${UI.calDay}">
+
+      <label class="check-row"><input type="checkbox" name="allDay" id="ev-allday"> Ganztägig</label>
+      <div class="time-row" id="ev-times">
+        <label>Von <input name="start" type="time" value="18:00"></label>
+        <label>Bis <input name="end" type="time" value="20:00"></label>
+      </div>
+
+      <span class="cal-label">Symbol über dem Tag</span>
+      <div class="icon-pick">
+        ${CAL_ICONS.map(([ic, l], i) => `<label title="${l}"><input type="radio" name="icon" value="${ic}" ${i === 0 ? 'checked' : ''}><span>${ic || '–'}</span></label>`).join('')}
+      </div>
+
+      <label class="check-row"><input type="checkbox" name="repeat" value="weekly"> Jede Woche wiederholen</label>
+
+      <div class="sheet-actions">
+        <button type="button" class="btn ghost" data-action="close">Abbrechen</button>
+        <button class="btn primary">Speichern</button>
+      </div>
+    </form>`);
+  const allDay = document.getElementById('ev-allday');
+  const times = document.getElementById('ev-times');
+  allDay.addEventListener('change', () => {
+    times.classList.toggle('off', allDay.checked);
+    times.querySelectorAll('input').forEach((i) => { i.disabled = allDay.checked; });
+  });
 }
 
 // ---------- Benachrichtigungen ----------
@@ -651,8 +792,17 @@ function viewGame() {
 }
 
 // ---------- Rendern ----------
-const VIEWS = { home: viewHome, food: viewFood, movies: viewMovies, bucket: viewBucket, game: viewGame, wishes: viewWishes };
-const NAV = [['home', 'Wir'], ['food', 'Essen'], ['movies', 'Filme'], ['bucket', 'Listen'], ['game', 'Spielen']];
+const VIEWS = { home: viewHome, calendar: viewCalendar, food: viewFood, movies: viewMovies, bucket: viewBucket, game: viewGame, wishes: viewWishes };
+const NAV = [['home', 'Wir'], ['calendar', 'Kalender'], ['food', 'Essen'], ['bucket', 'Listen'], ['game', 'Spielen']];
+// Die Filme liegen jetzt im Bereich Listen.
+const navOn = (k) => UI.view === k || (k === 'bucket' && UI.view === 'movies');
+
+// Umschalter zwischen Bucket Lists und Filmen
+const listSwitch = (active) => `
+  <div class="tabs list-switch">
+    <button class="${active === 'bucket' ? 'on' : ''}" data-action="nav" data-to="bucket">Bucket Lists</button>
+    <button class="${active === 'movies' ? 'on' : ''}" data-action="nav" data-to="movies">Filme</button>
+  </div>`;
 
 function viewLogin() {
   return `
@@ -707,7 +857,7 @@ function render() {
   }
   $nav.classList.remove('hidden');
   $nav.innerHTML = NAV.map(([k, label]) => `
-    <button class="${UI.view === k ? 'on' : ''}" data-action="nav" data-to="${k}" ${UI.view === k ? 'aria-current="page"' : ''}>
+    <button class="${navOn(k) ? 'on' : ''}" data-action="nav" data-to="${k}" ${navOn(k) ? 'aria-current="page"' : ''}>
       ${icon(k)}<span>${label}</span>
     </button>`).join('');
   if (UI.view === 'food') bindSwipe();
@@ -835,6 +985,14 @@ const ACTIONS = {
     render();
   },
   'game-start': (d) => VolleyGame.start({ mode: d.mode, me, onClose: render }),
+  'cal-month': (d) => {
+    const m = UI.calMonth;
+    UI.calMonth = new Date(m.getFullYear(), m.getMonth() + Number(d.to), 1);
+    render();
+  },
+  'cal-day': (d) => { UI.calDay = d.to; render(); },
+  'cal-add': calForm,
+  'cal-remove': (d) => removeWithUndo('events', d.id, DB.get('events', d.id)?.title || 'Termin'),
   'push-enable': () => { closeOverlay(); enablePush(); },
   // Zeigt direkt auf diesem Handy eine Benachrichtigung, ganz ohne Server.
   // Erscheint sie nicht, liegt es an den Einstellungen des Handys.
@@ -944,6 +1102,22 @@ const ACTIONS = {
 };
 
 const FORMS = {
+  event: (f) => {
+    if (!f.title || !f.date) { toast('Bitte Titel und Tag angeben'); return false; }
+    const allDay = f.allDay === 'on';
+    if (!allDay && !f.start) { toast('Bitte eine Startzeit wählen oder ganztägig ankreuzen'); return false; }
+    if (!allDay && f.end && f.end < f.start) { toast('Das Ende liegt vor dem Anfang'); return false; }
+    DB.put('events', {
+      id: uid(), title: f.title, owner: f.owner || me, date: f.date, allDay,
+      start: allDay ? '' : f.start, end: allDay ? '' : (f.end || ''),
+      icon: f.icon || '', repeat: f.repeat === 'weekly' ? 'weekly' : '', by: me, at: Date.now(),
+    });
+    UI.calDay = f.date;
+    const d = fromIso(f.date);
+    UI.calMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+    closeOverlay();
+    toast('Termin gespeichert');
+  },
   wish: (f) => {
     DB.put('wishes', { id: uid(), text: f.text, by: me, at: Date.now(), status: 'open', seen: false, noticed: false });
     toast('Dein Wunsch ist angekommen');
@@ -983,7 +1157,8 @@ document.addEventListener('submit', (e) => {
   e.preventDefault();
   const values = Object.fromEntries(new FormData(form));
   Object.keys(values).forEach((k) => { values[k] = values[k].trim(); });
-  if (Object.values(values).some((v) => !v)) return;
+  // Der Termin hat freiwillige Felder und prüft selbst.
+  if (form.dataset.form !== 'event' && Object.values(values).some((v) => !v)) return;
   document.activeElement?.blur();
   FORMS[form.dataset.form](values);
   renderPending = false;

@@ -1019,6 +1019,71 @@ body[data-list='summer'] #app { padding-top: calc(14px + env(safe-area-inset-top
 .login input { margin-bottom: 6px; }
 .login .btn { margin-top: 4px; }
 .login-error { min-height: 20px; color: #ff9fb2; font-size: 14px; }
+/* ---------- Kalender ---------- */
+:root { --timm: #3fcf7f; --fenja: #ff5b6b; }
+.list-switch { margin-bottom: 2px; }
+.cal-legend { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 13px; }
+.cal-legend .dot { width: 10px; height: 10px; border-radius: 50%; margin-left: 4px; }
+.dot.timm, .cal-dots i.timm { background: var(--timm); }
+.dot.fenja, .cal-dots i.fenja { background: var(--fenja); }
+.legend-heart .heart-split { width: 14px; height: 14px; display: block; margin-left: 4px; }
+.cal { padding: 10px 8px; }
+.cal-head { display: flex; align-items: center; justify-content: space-between; padding: 0 4px; }
+.cal-head h2 { text-transform: capitalize; }
+.cal-nav { width: 40px; height: 40px; border-radius: 12px; background: var(--surface-2); font-size: 22px; line-height: 1; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+.cal-wd { padding: 4px 0; color: var(--muted); font-size: 11.5px; font-weight: 700; text-align: center; }
+.cal-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  min-height: 58px;
+  padding: 3px 1px 4px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+.cal-day.other { opacity: 0.38; }
+.cal-day.today .cal-num { background: var(--amber); color: #2a1209; }
+.cal-day.sel { border-color: var(--text); }
+.cal-num { display: grid; place-items: center; min-width: 22px; height: 22px; border-radius: 11px; font-size: 13px; font-weight: 700; }
+.cal-icons { display: flex; align-items: center; gap: 1px; min-height: 17px; }
+.cal-icons b { font-size: 11px; color: var(--muted); }
+.cal-ic { display: grid; place-items: center; width: 17px; height: 17px; border-radius: 50%; font-size: 10.5px; line-height: 1; }
+.cal-ic.timm { background: var(--timm); }
+.cal-ic.fenja { background: var(--fenja); }
+.cal-ic.both { background: linear-gradient(90deg, var(--timm) 50%, var(--fenja) 50%); }
+.cal-ic.heart { background: none; }
+.cal-ic .heart-split { width: 17px; height: 17px; }
+.cal-dots { display: flex; gap: 2px; min-height: 6px; }
+.cal-dots i { width: 6px; height: 6px; border-radius: 50%; }
+.cal-dots i.both { background: linear-gradient(90deg, var(--timm) 50%, var(--fenja) 50%); }
+.cal-event { gap: 8px; padding-left: 0; overflow: hidden; }
+.cal-bar { align-self: stretch; width: 6px; flex: none; }
+.cal-event.timm .cal-bar { background: var(--timm); }
+.cal-event.fenja .cal-bar { background: var(--fenja); }
+.cal-event.both .cal-bar { background: linear-gradient(180deg, var(--timm) 50%, var(--fenja) 50%); }
+.cal-event-ic { flex: none; width: 26px; font-size: 20px; text-align: center; }
+.cal-event-ic .heart-split { width: 22px; height: 22px; display: block; margin: 0 auto; }
+.cal-form { gap: 7px; max-height: calc(100dvh - 32px); overflow-y: auto; }
+.cal-form label:not(.check-row):not(.seg label):not(.icon-pick label), .cal-label { color: var(--muted); font-size: 13px; }
+.cal-owner span.timm { color: var(--timm); }
+.cal-owner span.fenja { color: var(--fenja); }
+.cal-owner input:checked + span.timm { background: var(--timm); color: #0e2a1b; }
+.cal-owner input:checked + span.fenja { background: var(--fenja); color: #2a0c10; }
+.cal-owner input:checked + span.both { background: linear-gradient(90deg, var(--timm) 50%, var(--fenja) 50%); color: #1b0d12; }
+.check-row { display: flex; align-items: center; gap: 8px; min-height: 40px; font-weight: 600; }
+.check-row input { width: 20px; height: 20px; accent-color: var(--amber); }
+.time-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.time-row label { display: flex; flex-direction: column; gap: 3px; color: var(--muted); font-size: 13px; }
+.time-row.off { opacity: 0.4; }
+.icon-pick { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+.icon-pick input { position: absolute; opacity: 0; pointer-events: none; }
+.icon-pick span { display: grid; place-items: center; height: 42px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface-2); font-size: 20px; cursor: pointer; }
+.icon-pick input:checked + span { border-color: var(--amber); background: color-mix(in srgb, var(--amber) 22%, var(--surface-2)); }
+.icon-pick input:focus-visible + span { outline: 2px solid var(--amber); }
+
 /* ---------- Benachrichtigungen ---------- */
 .push-card { gap: 6px; }
 .push-card .row:first-child { justify-content: flex-start; }
