@@ -48,7 +48,9 @@ function seasonEnd(date) {
 }
 
 // ---------- Zustand ----------
-const ME_KEY = 'wirzwei.me';
+const ME_KEY = `${APP.key}.me`;
+// Persönlicher Login-Link, z. B. #fenja-CODE. Die Namen kommen aus config.js.
+const LOGIN_HASH = new RegExp(`^#(${COUPLE.people.map((p) => p.toLowerCase()).join("|")})-([A-Za-z0-9]+)$`);
 let me = localStorage.getItem(ME_KEY);
 const other = () => COUPLE.people.find((p) => p !== me);
 const UI = {
@@ -549,7 +551,7 @@ function viewBucket() {
     ${key === 'summer' ? beachScene() : ''}
     ${key === 'winter' ? winterScene() : ''}
 
-    ${key === 'autumn' ? `
+    ${key === 'autumn' && APP.autumnPicture ? `
       <button class="poster" data-action="poster" aria-label="Eure Herbst-Bucket-List groß ansehen">
         <img src="assets/herbst.jpg" alt="Timm, Fenja und ihre drei Katzen als Anime-Figuren mit Kürbis">
         <span>Unsere Herbstliste ♥</span>
@@ -632,7 +634,7 @@ function viewCalendar() {
   return `
     <header class="page-head">
       <h1>Kalender</h1>
-      <p class="muted cal-legend"><span class="dot timm"></span>Timm <span class="dot fenja"></span>Fenja <span class="legend-heart">${HEART_SPLIT}</span>Zusammen</p>
+      <p class="muted cal-legend"><span class="dot timm"></span>${esc(COUPLE.people[0])} <span class="dot fenja"></span>${esc(COUPLE.people[1])} <span class="legend-heart">${HEART_SPLIT}</span>Zusammen</p>
     </header>
 
     <section class="card cal">
@@ -726,7 +728,7 @@ function calForm(ev = null) {
 // ---------- Benachrichtigungen ----------
 // Öffentlicher Schlüssel: darf im Code stehen. Der geheime Gegenpart liegt nur bei Supabase.
 const PUSH_PUBLIC_KEY = 'BF6lYZjIQcuha8by_hSIREUF-gBPZ3cpqODAo7vLBm-GDOXTqhhX8ENhlREcSSDnkxIDAeIJ3L7yfS4YRhifrQc';
-const PUSH_LATER_KEY = 'wirzwei.push.later';
+const PUSH_LATER_KEY = `${APP.key}.push.later`;
 
 const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
 const pushGranted = () => pushSupported() && Notification.permission === 'granted';
@@ -793,7 +795,7 @@ function wishHint() {
 
 function viewWishes() {
   const wishes = DB.list('wishes').sort((a, b) => b.at - a.at);
-  const canManage = me === COUPLE.people[0];
+  const canManage = me === APP.admin;
   return `
     <header class="page-head">
       <button class="wish-back" data-action="nav" data-to="home">← Zurück</button>
@@ -819,7 +821,37 @@ function viewWishes() {
         </div>` : ''}
         ${canManage || w.by === me ? `<button class="wish-del" data-action="wish-remove" data-id="${esc(w.id)}" aria-label="Wunsch löschen">✕</button>` : ''}
       </li>`).join('')}</ul>` : '<p class="muted empty-line">Noch keine Wünsche. Was fehlt euch noch?</p>'}
+    ${friendWishesBlock()}
   `;
+}
+
+// Wünsche aus der App von Bruno und Janina. Timm darf dort nur Wünsche lesen und den Stand setzen.
+function friendWishesBlock() {
+  const f = APP.friendWishes;
+  if (!f || me !== APP.admin) return '';
+  if (UI.friendWishes === undefined) { loadFriendWishes(); return ''; }
+  const list = (UI.friendWishes || []).sort((a, b) => b.at - a.at);
+  return `
+    <h2 class="friend-wish-head">Von ${esc(f.label)}</h2>
+    ${UI.friendWishes === null ? '<p class="muted empty-line">Konnte nicht geladen werden.</p>'
+      : list.length ? `<ul class="list">${list.map((w) => `
+      <li class="card wish">
+        <p class="wish-text">${esc(w.text)}</p>
+        <div class="wish-meta">
+          <small class="muted">${esc(w.by)}, ${fmtShort(w.at)}</small>
+          <span class="wish-tag ${esc(w.status)}">${esc(WISH_STATUS[w.status] || 'Offen')}</span>
+        </div>
+        <div class="wish-actions">
+          ${Object.entries(WISH_STATUS).map(([key, label]) => `<button class="${w.status === key ? 'on' : ''}" data-action="fwish-status" data-id="${esc(w.id)}" data-to="${key}" aria-pressed="${w.status === key}">${label}</button>`).join('')}
+        </div>
+      </li>`).join('')}</ul>` : '<p class="muted empty-line">Noch keine Wünsche.</p>'}`;
+}
+
+async function loadFriendWishes() {
+  UI.friendWishes = [];
+  const { data, error } = await sb.from(APP.friendWishes.table).select('data').eq('collection', 'wishes');
+  UI.friendWishes = error ? null : data.map((r) => r.data);
+  if (UI.view === 'wishes') render();
 }
 
 // Wer die Seite offen hat, hat neue Wünsche gesehen.
@@ -1026,7 +1058,7 @@ function confetti() {
 function celebrateMilestoneOnce() {
   const now = today();
   if (!milestones().some((m) => +m.date === +now)) return;
-  const key = `wirzwei.party.${now.toISOString().slice(0, 10)}`;
+  const key = `${APP.key}.party.${now.toISOString().slice(0, 10)}`;
   if (localStorage.getItem(key)) return;
   localStorage.setItem(key, '1');
   setTimeout(confetti, 400);
@@ -1084,7 +1116,7 @@ const ACTIONS = {
     closeOverlay();
     try {
       const reg = await navigator.serviceWorker.ready;
-      await reg.showNotification('Test von Wir zwei', { body: 'Wenn du das siehst, kann dein Handy Benachrichtigungen anzeigen.', icon: 'icons/icon-192.png', badge: 'icons/badge.png', tag: 'test' });
+      await reg.showNotification(`Test von ${APP.title}`, { body: 'Wenn du das siehst, kann dein Handy Benachrichtigungen anzeigen.', icon: `${APP.root}icons/icon-192.png`, badge: `${APP.root}icons/badge.png`, tag: 'test' });
       toast('Test geschickt. Schau oben in die Leiste.');
     } catch (err) {
       toast('Test hat nicht geklappt: ' + (err && err.message ? err.message : 'unbekannter Fehler'));
@@ -1094,7 +1126,17 @@ const ACTIONS = {
     try { localStorage.setItem(PUSH_LATER_KEY, '1'); } catch {}
     render();
   },
+  'fwish-status': async (d) => {
+    const w = (UI.friendWishes || []).find((x) => x.id === d.id);
+    if (!w) return;
+    const next = { ...w, status: d.to, noticed: d.to === 'done' ? !!w.noticed : false };
+    Object.assign(w, next);
+    render();
+    const { error } = await sb.from(APP.friendWishes.table).update({ data: next, updated_at: new Date().toISOString() }).eq('collection', 'wishes').eq('id', w.id);
+    if (error) toast('Hat nicht geklappt, versuch es nochmal');
+  },
   'open-wishes': () => {
+    UI.friendWishes = undefined;
     closeOverlay();
     goto('wishes');
     markWishesSeen();
@@ -1286,7 +1328,7 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catc
 // Wird ein Link in eine schon offene Seite eingefügt, lädt sie neu und meldet an.
 addEventListener('hashchange', () => {
   // Nur persönliche Links lösen eine Anmeldung aus, Sprungziele aus Benachrichtigungen nicht.
-  if (/^#(timm|fenja)-/.test(location.hash)) location.reload();
+  if (LOGIN_HASH.test(location.hash)) location.reload();
 });
 
 // Beim Start: Ist noch jemand angemeldet, geht es direkt in die App.
@@ -1294,7 +1336,7 @@ addEventListener('hashchange', () => {
   render();
   await Auth.restore();
   // Persönlicher Link, z. B. …/wir-zwei/#fenja-CODE: einmal öffnen genügt, danach bleibt man angemeldet.
-  const link = location.hash.match(/^#(timm|fenja)-([A-Za-z0-9]+)$/);
+  const link = location.hash.match(LOGIN_HASH);
   if (link) {
     history.replaceState(null, '', location.pathname);
     if (!Auth.user || Auth.person().toLowerCase() !== link[1]) {

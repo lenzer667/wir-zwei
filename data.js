@@ -1,8 +1,5 @@
-// Alles Persönliche steht hier und lässt sich leicht ändern.
-const COUPLE = {
-  people: ['Timm', 'Fenja'],
-  start: [2026, 5, 20], // Jahr, Monat, Tag
-};
+// Namen und Datum stehen in config.js.
+const COUPLE = APP.couple;
 
 const DISHES = [
   ['pizza', 'Pizza', '🍕'], ['burger', 'Burger', '🍔'], ['pasta', 'Pasta', '🍝'],
@@ -56,3 +53,6 @@ const BUCKET_SEEDS = {
     'Sterne gucken', 'Spontaner Roadtrip', 'Eine Nacht zelten', 'Wasserschlacht',
   ],
 };
+
+// Eine andere Ausgabe der App kann eigene Vorschläge mitbringen.
+if (APP.bucketSeeds) Object.assign(BUCKET_SEEDS, APP.bucketSeeds);

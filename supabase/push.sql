@@ -1,5 +1,5 @@
 -- Meldet neue Zettel und geänderte Wünsche an das Supabase-Programm "notify".
--- Es wird nur Sammlung und Kennung geschickt, keine Inhalte und keine Geheimnisse.
+-- Es wird nur Tabelle, Sammlung und Kennung geschickt, keine Inhalte und keine Geheimnisse.
 create extension if not exists pg_net;
 
 create or replace function public.notify_push()
@@ -16,7 +16,7 @@ begin
   perform net.http_post(
     url := 'https://zsiwfnozxndgiyaaejxo.supabase.co/functions/v1/notify',
     headers := jsonb_build_object('Content-Type', 'application/json'),
-    body := jsonb_build_object('collection', new.collection, 'id', new.id)
+    body := jsonb_build_object('table', tg_table_name, 'collection', new.collection, 'id', new.id)
   );
   return new;
 end;

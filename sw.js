@@ -1,5 +1,5 @@
 // Netzwerk zuerst, damit Updates sofort ankommen. Ohne Internet startet die App aus dem Cache.
-const CACHE = 'wirzwei-v27';
+const CACHE = 'wirzwei-v28';
 
 // Benachrichtigungen: Supabase schickt Titel und Ziel, das Handy zeigt sie an.
 self.addEventListener('push', (e) => {
@@ -27,7 +27,7 @@ self.addEventListener('notificationclick', (e) => {
     })
   );
 });
-const SHELL = ['./', 'index.html', 'styles.css', 'data.js', 'store.js', 'figuren-seite.js', 'decor.js', 'game.js', 'app.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/badge.png', 'assets/herbst.jpg'];
+const SHELL = ['./', 'index.html', 'styles.css', 'config.js', 'data.js', 'store.js', 'figuren-seite.js', 'decor.js', 'game.js', 'app.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/badge.png', 'assets/herbst.jpg'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -36,7 +36,8 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      // Nur eigene alte Speicher löschen, die App von Bruno und Janina liegt auf derselben Adresse.
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('wirzwei-') && k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });

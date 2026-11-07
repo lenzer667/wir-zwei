@@ -287,7 +287,7 @@ function beachScene() {
 // ---------- Effekte ----------
 const Decor = (() => {
   const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const PREF = 'wirzwei.walkers';
+  const PREF = `${APP.key}.walkers`;
   const heartLayer = document.createElement('div');
   heartLayer.id = 'heart-layer';
   heartLayer.setAttribute('aria-hidden', 'true');
@@ -347,7 +347,7 @@ const Decor = (() => {
   walkers.id = 'walkers';
   walkers.setAttribute('aria-hidden', 'true');
   walkers.innerHTML = `<div class="walk-inner">
-    ${catSVG('light', 'c3')}${catSVG('grey', 'c1')}${sideCouple()}
+    ${APP.cats === false ? '' : catSVG('light', 'c3') + catSVG('grey', 'c1')}${sideCouple()}
   </div>`;
   // Die Bühne schneidet alles außerhalb des Bildschirms ab, sonst zoomen Handys die Seite heraus.
   const stage = document.createElement('div');

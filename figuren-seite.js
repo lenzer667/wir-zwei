@@ -1,5 +1,7 @@
 // Von vorne fürs Startbild und den Match-Jubel: Beide schauen zur Kamera und halten sich an der Hand.
-const FRONT_PARTS = {
+// Eine andere Ausgabe der App bringt in config.js eigene Figuren mit (APP.sprites.front und .side).
+// "place" rückt Figuren aus einem anderen Bild an dieselbe Stelle wie die von Timm und Fenja.
+const FRONT_PARTS = APP.sprites.front || {
   fenja: {
     body: [150, 20, 500, 650], 'arm-l': [40, 380, 250, 90], 'arm-r': [550, 380, 210, 90],
     'leg-l': [250, 612, 168, 410], 'leg-r': [418, 612, 175, 410],
@@ -14,7 +16,7 @@ const FRONT_PARTS = {
 
 function frontImage(who, part) {
   const [x, y, w, h] = FRONT_PARTS[who][part];
-  return `<image href="assets/figuren/${who}-${part}.png" x="${x}" y="${y}" width="${w}" height="${h}"/>`;
+  return `<image href="${APP.sprites.dir}${APP.sprites[who]}-${part}.png" x="${x}" y="${y}" width="${w}" height="${h}"/>`;
 }
 
 function frontFigure(who, armL, armR) {
@@ -22,7 +24,10 @@ function frontFigure(who, armL, armR) {
     const [px, py] = FRONT_PARTS[who].pivots[part];
     return `<g class="sp-part" style="--r:${rot}deg;transform-origin:${px}px ${py}px">${frontImage(who, part)}</g>`;
   };
-  return `<g class="sp-bob">${frontImage(who, 'leg-l')}${frontImage(who, 'leg-r')}${frontImage(who, 'body')}${arm('arm-l', armL)}${arm('arm-r', armR)}</g>`;
+  const arms = `${arm('arm-l', armL)}${arm('arm-r', armR)}`;
+  // Bei langen offenen Haaren hängen die Arme hinter den Haaren.
+  const behind = FRONT_PARTS[who].armsBehind;
+  return `<g class="sp-bob"><g transform="${FRONT_PARTS[who].place || ''}">${frontImage(who, 'leg-l')}${frontImage(who, 'leg-r')}${behind ? arms : ''}${frontImage(who, 'body')}${behind ? '' : arms}</g></g>`;
 }
 
 function frontCouple(cls = '') {
@@ -36,7 +41,7 @@ function frontCouple(cls = '') {
 }
 
 // Timm und Fenja von der Seite. Alle Teile liegen in den Koordinaten des Originalbilds.
-const SIDE_PARTS = {
+const SIDE_PARTS = APP.sprites.side || {
   fenja: {
     y0: 8, foot: 503, body: [620, 8, 225, 316], leg: [705, 300, 135, 205], hip: [757, 318],
     arm: [90, 186, 140, 62], armPivot: [222, 216], shoulder: [752, 212],
@@ -50,7 +55,7 @@ const SIDE_PARTS = {
 };
 
 function sideImage(who, name, [x, y, w, h]) {
-  return `<image href="assets/figuren/${who}-side-${name}.png" x="${x}" y="${y}" width="${w}" height="${h}"/>`;
+  return `<image href="${APP.sprites.dir}${APP.sprites[who]}-side-${name}.png" x="${x}" y="${y}" width="${w}" height="${h}"/>`;
 }
 
 function sideLeg(who, name, cls) {
@@ -125,28 +130,30 @@ const SIDE_WEAR = {
 
 // Fertige Pose fürs Spiel und die Szenen: Beine stehen, nur der vordere Arm bewegt sich.
 function sidePose(who, outfit, armCls) {
-  const wear = SIDE_WEAR[who][outfit] || {};
-  const ball = armCls === 'w-arm-s' ? `<circle class="hand-ball" cx="${who === 'fenja' ? 84 : 84}" cy="${who === 'fenja' ? 220 : 727}" r="26" fill="#fff" stroke="#b7d6ee" stroke-width="4"/>` : '';
-  return `
+  const wear = (APP.sprites.wear === false ? null : SIDE_WEAR[who][outfit]) || {};
+  const p = SIDE_PARTS[who];
+  const [bx, by, br] = p.ball || [84, who === 'fenja' ? 220 : 727, 26];
+  const ball = armCls === 'w-arm-s' ? `<circle class="hand-ball" cx="${bx}" cy="${by}" r="${br}" fill="#fff" stroke="#b7d6ee" stroke-width="4"/>` : '';
+  return `<g transform="${p.place || ''}">
     ${sideArm(who, 'arm-back', '', -84, 0, wear.sleeve || '')}
     ${wear.leg ? bareLeg(who, wear, true, 'sp-b') : sideLeg(who, 'leg-back', 'sp-b')}
     ${wear.leg ? bareLeg(who, wear, false, 'sp-a') : sideLeg(who, 'leg', 'sp-a')}
     ${sideImage(who, 'body', SIDE_PARTS[who].body)}
     ${wear.body || ''}
     ${wear.head || ''}
-    ${sideArm(who, 'arm', armCls, -95, 0, (wear.sleeve || '') + ball)}`;
+    ${sideArm(who, 'arm', armCls, -95, 0, (wear.sleeve || '') + ball)}</g>`;
 }
 
 // Figur im Profil, schaut nach rechts: hinterer Arm und Bein liegen hinter dem Körper.
 function sideFigure(who, { backArm, frontArm }) {
   const p = SIDE_PARTS[who];
-  return `<g class="sp-bob">
+  return `<g class="sp-bob"><g transform="${p.place || ''}">
     ${backArm}
     ${sideLeg(who, 'leg-back', 'sp-b')}
     ${sideLeg(who, 'leg', 'sp-a')}
     ${sideImage(who, 'body', p.body)}
     ${frontArm}
-  </g>`;
+  </g></g>`;
 }
 
 // Hand in Hand: Timm geht vorne, Fenja dahinter. Timm liegt im Bild tiefer, deshalb wird er hochgezogen.

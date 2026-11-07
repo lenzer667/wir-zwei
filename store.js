@@ -5,7 +5,8 @@ const SUPABASE_URL = 'https://zsiwfnozxndgiyaaejxo.supabase.co';
 // Öffentlicher Schlüssel: Darf im Code stehen, die Daten schützen die Regeln in der Datenbank.
 const SUPABASE_KEY = 'sb_publishable_Z0uUqYonFQlEOIroZ1EP2Q_NdKyzzjC';
 
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// Jede Ausgabe der App merkt sich ihre Anmeldung getrennt, auch wenn beide im selben Browser laufen.
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, APP.authKey ? { auth: { storageKey: APP.authKey } } : undefined);
 
 const Auth = {
   user: null,
@@ -34,9 +35,9 @@ const Auth = {
 };
 
 const DB = (() => {
-  const CACHE_KEY = 'wirzwei.cache.v2';
-  const QUEUE_KEY = 'wirzwei.queue.v2';
-  const LEGACY_KEY = 'wirzwei.data.v1'; // alte, nur lokale Daten: werden nie gelöscht
+  const CACHE_KEY = `${APP.key}.cache.v2`;
+  const QUEUE_KEY = `${APP.key}.queue.v2`;
+  const LEGACY_KEY = `${APP.key}.data.v1`; // alte, nur lokale Daten: werden nie gelöscht
   const listeners = new Set();
   let data = {};
   let queue = [];
@@ -63,11 +64,11 @@ const DB = (() => {
         const op = queue[0];
         let result;
         if (op.type === 'upsert') {
-          result = await sb.from('records').upsert(op.rows.map((r) => ({ collection: r.collection, id: r.id, data: r.data, updated_at: new Date().toISOString() })));
+          result = await sb.from(APP.table).upsert(op.rows.map((r) => ({ collection: r.collection, id: r.id, data: r.data, updated_at: new Date().toISOString() })));
         } else if (op.type === 'delete') {
-          result = await sb.from('records').delete().eq('collection', op.collection).eq('id', op.id);
+          result = await sb.from(APP.table).delete().eq('collection', op.collection).eq('id', op.id);
         } else {
-          result = await sb.from('records').delete().eq('collection', op.collection);
+          result = await sb.from(APP.table).delete().eq('collection', op.collection);
         }
         if (result.error) throw result.error;
         queue.shift();
@@ -88,8 +89,8 @@ const DB = (() => {
 
   function listen() {
     if (channel) return;
-    channel = sb.channel('records-live')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'records' }, (change) => {
+    channel = sb.channel(`${APP.table}-live`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: APP.table }, (change) => {
         if (change.eventType === 'DELETE') {
           const { collection, id } = change.old;
           if (data[collection]) delete data[collection][id];
@@ -113,7 +114,7 @@ const DB = (() => {
       const PAGE = 1000;
       try {
         for (let from = 0; ; from += PAGE) {
-          const { data: rows, error } = await sb.from('records').select('collection,id,data').range(from, from + PAGE - 1);
+          const { data: rows, error } = await sb.from(APP.table).select('collection,id,data').range(from, from + PAGE - 1);
           if (error) throw error;
           rows.forEach((r) => { (fresh[r.collection] = fresh[r.collection] || {})[r.id] = r.data; });
           if (rows.length < PAGE) break;
