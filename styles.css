@@ -1019,6 +1019,13 @@ body[data-list='summer'] #app { padding-top: calc(14px + env(safe-area-inset-top
 .login input { margin-bottom: 6px; }
 .login .btn { margin-top: 4px; }
 .login-error { min-height: 20px; color: #ff9fb2; font-size: 14px; }
+/* ---------- Benachrichtigungen ---------- */
+.push-card { gap: 6px; }
+.push-card .row:first-child { justify-content: flex-start; }
+.push-card strong, .push-card small { display: block; }
+.push-bell { font-size: 24px; line-height: 1; }
+.push-on { text-align: center; font-size: 14px; }
+
 /* ---------- Wünsche für die App ---------- */
 .wish-hint {
   display: flex;

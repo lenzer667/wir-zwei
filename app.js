@@ -86,6 +86,10 @@ async function enterApp() {
   if (me) {
     celebrateMilestoneOnce();
     noticeWishes();
+    // Ist schon erlaubt, wird das Handy still noch einmal gemeldet, falls sich etwas geändert hat.
+    if (pushGranted()) savePushSubscription().catch(() => {});
+    if (location.hash === '#zettel') { history.replaceState(null, '', location.pathname); UI.view = 'home'; render(); }
+    if (location.hash === '#wuensche') { history.replaceState(null, '', location.pathname); goto('wishes'); markWishesSeen(); }
   }
 }
 
@@ -152,6 +156,8 @@ function viewHome() {
     </section>
 
     ${wishHint()}
+
+    ${pushCard()}
 
     ${viewNotes()}
 
@@ -460,6 +466,58 @@ function viewBucket() {
   `;
 }
 
+// ---------- Benachrichtigungen ----------
+// Öffentlicher Schlüssel: darf im Code stehen. Der geheime Gegenpart liegt nur bei Supabase.
+const PUSH_PUBLIC_KEY = 'BF6lYZjIQcuha8by_hSIREUF-gBPZ3cpqODAo7vLBm-GDOXTqhhX8ENhlREcSSDnkxIDAeIJ3L7yfS4YRhifrQc';
+const PUSH_LATER_KEY = 'wirzwei.push.later';
+
+const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+const pushGranted = () => pushSupported() && Notification.permission === 'granted';
+
+function keyBytes(b64) {
+  const s = (b64 + '='.repeat((4 - (b64.length % 4)) % 4)).replace(/-/g, '+').replace(/_/g, '/');
+  return Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+}
+
+// Speichert das Handy in der Datenbank, damit Supabase weiß, wohin es schicken soll.
+async function savePushSubscription() {
+  const reg = await navigator.serviceWorker.ready;
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(PUSH_PUBLIC_KEY) });
+  const json = sub.toJSON();
+  const id = `${me}-${Math.abs(hash(json.endpoint)).toString(36)}`;
+  if (!DB.get('push', id)) DB.put('push', { id, person: me, sub: json, at: Date.now() });
+}
+
+async function enablePush() {
+  if (!pushSupported()) { toast('Dieses Handy kann keine Benachrichtigungen von der App bekommen'); return; }
+  const perm = await Notification.requestPermission();
+  if (perm !== 'granted') { toast('Benachrichtigungen sind nicht erlaubt'); render(); return; }
+  try {
+    await savePushSubscription();
+    toast('Benachrichtigungen sind an');
+  } catch (err) {
+    toast('Einschalten hat nicht geklappt');
+  }
+  render();
+}
+
+function pushCard() {
+  if (!pushSupported() || Notification.permission !== 'default') return '';
+  try { if (localStorage.getItem(PUSH_LATER_KEY)) return ''; } catch {}
+  return `
+    <section class="card push-card">
+      <div class="row">
+        <span class="push-bell" aria-hidden="true">🔔</span>
+        <p><strong>Benachrichtigungen einschalten</strong><small class="muted">Damit du neue Zettel sofort siehst</small></p>
+      </div>
+      <div class="row">
+        <button class="btn link" data-action="push-later">Später</button>
+        <button class="btn primary small" data-action="push-enable">Einschalten</button>
+      </div>
+    </section>`;
+}
+
 // ---------- Wünsche für die App ----------
 const WISH_STATUS = { open: 'Offen', doing: 'In Arbeit', done: 'Erfüllt' };
 
@@ -721,6 +779,11 @@ const ACTIONS = {
     <div class="sheet center">
       <h2>Hey ${esc(me)}</h2>
       <button class="btn primary wide" data-action="open-wishes">✨ Wünsche für die App</button>
+      ${!pushSupported() ? '' : pushGranted()
+        ? '<p class="muted push-on">🔔 Benachrichtigungen sind an</p>'
+        : Notification.permission === 'denied'
+          ? '<p class="muted push-on">🔕 Benachrichtigungen sind blockiert. Erlauben kannst du sie in Chrome über das Schloss neben der Adresse oder in den App-Einstellungen des Handys.</p>'
+          : '<button class="btn ghost wide" data-action="push-enable">🔔 Benachrichtigungen einschalten</button>'}
       <button class="btn ghost wide" data-action="toggle-walkers">${Decor.prefOn() ? 'Laufende Figuren ausblenden' : 'Laufende Figuren einblenden'}</button>
       <button class="btn link" data-action="close">Schließen</button>
     </div>`),
@@ -737,6 +800,11 @@ const ACTIONS = {
     render();
   },
   'game-start': (d) => VolleyGame.start({ mode: d.mode, me, onClose: render }),
+  'push-enable': () => { closeOverlay(); enablePush(); },
+  'push-later': () => {
+    try { localStorage.setItem(PUSH_LATER_KEY, '1'); } catch {}
+    render();
+  },
   'open-wishes': () => {
     closeOverlay();
     goto('wishes');
@@ -884,7 +952,10 @@ addEventListener('beforeinstallprompt', (e) => {
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 
 // Wird ein Link in eine schon offene Seite eingefügt, lädt sie neu und meldet an.
-addEventListener('hashchange', () => location.reload());
+addEventListener('hashchange', () => {
+  // Nur persönliche Links lösen eine Anmeldung aus, Sprungziele aus Benachrichtigungen nicht.
+  if (/^#(timm|fenja)-/.test(location.hash)) location.reload();
+});
 
 // Beim Start: Ist noch jemand angemeldet, geht es direkt in die App.
 (async () => {
