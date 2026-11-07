@@ -289,6 +289,23 @@ textarea { display: block; resize: none; margin-bottom: 10px; }
 }
 .check[aria-pressed='true']::before { content: '✓'; border-color: var(--season, var(--amber)); background: var(--season, var(--amber)); }
 .item.done { background: transparent; }
+/* Filmbewertung */
+.rating { display: flex; flex-direction: column; gap: 2px; margin-top: 6px; font-size: 13px; }
+.rate-line b { font-weight: 400; letter-spacing: 1px; }
+.rate-line.timm { color: var(--timm); }
+.rate-line.fenja { color: var(--fenja); }
+.rate-line.muted { color: var(--muted); }
+.rate-foot { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.verdict { padding: 2px 9px; border-radius: 999px; background: rgba(255, 192, 106, 0.14); color: var(--amber); font-size: 12px; }
+.rate-btn { margin-left: auto; padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 12px; }
+.item.fav { border-color: rgba(255, 192, 106, 0.45); background: rgba(255, 192, 106, 0.06); }
+.item.done.fav strong { color: inherit; text-decoration: none; }
+.fav-label { display: block; color: var(--amber); font-size: 12px; }
+.rate-title { font-size: 24px; overflow-wrap: anywhere; }
+.star-row { display: flex; gap: 4px; }
+.star { width: 48px; height: 48px; font-size: 36px; line-height: 1; color: rgba(255, 221, 190, 0.2); transition: color 0.15s, transform 0.15s; }
+.star.on { color: var(--amber); transform: scale(1.08); }
+#rate-word.picked { color: var(--amber); }
 .item.done strong { color: var(--muted); text-decoration: line-through; }
 .del { flex: none; width: 44px; height: 44px; color: var(--muted); font-size: 14px; opacity: 0.7; }
 

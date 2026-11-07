@@ -379,6 +379,8 @@ function viewMovies() {
   const open = all.filter((m) => !m.watched);
   const seen = all.filter((m) => m.watched);
   const list = UI.movieFilter === 'open' ? open : seen;
+  const fav = UI.movieFilter === 'seen' ? favoriteMovie(seen) : null;
+  const sortSeen = (l) => (fav ? [l.find((m) => m.id === fav), ...l.filter((m) => m.id !== fav)] : l);
 
   return `
     ${listSwitch('movies')}
@@ -410,14 +412,84 @@ function viewMovies() {
       <button class="${UI.movieFilter === 'seen' ? 'on' : ''}" data-action="movie-filter" data-to="seen">Gesehen (${seen.length})</button>
     </div>
 
-    ${list.length ? `<ul class="list">${list.map((m) => `
-      <li class="item ${m.watched ? 'done' : ''}">
+    ${list.length ? `<ul class="list">${sortSeen(list).map((m) => `
+      <li class="item ${m.watched ? 'done' : ''} ${m.id === fav ? 'fav' : ''}">
         <button class="check" data-action="movie-toggle" data-id="${esc(m.id)}" aria-pressed="${!!m.watched}" aria-label="${esc(m.title)} als gesehen markieren"></button>
-        <div class="item-body"><strong>${esc(m.title)}</strong><small>${esc(m.kind)} · von ${esc(m.by)}</small></div>
+        <div class="item-body">
+          ${m.id === fav ? '<span class="fav-label">Euer Lieblingsfilm</span>' : ''}
+          <strong>${esc(m.title)}</strong><small>${esc(m.kind)} · von ${esc(m.by)}</small>
+          ${m.watched ? ratingBlock(m) : ''}
+        </div>
         <button class="del" data-action="movie-remove" data-id="${esc(m.id)}" aria-label="${esc(m.title)} löschen">✕</button>
       </li>`).join('')}</ul>`
       : `<p class="muted empty-line">${UI.movieFilter === 'open' ? 'Noch nichts auf der Liste.' : 'Noch nichts gesehen.'}</p>`}
   `;
+}
+
+// ---------- Filme bewerten ----------
+// Jede Bewertung ist ein eigener Eintrag, damit sich beide nicht gegenseitig überschreiben.
+const RATING_WORDS = ['Schlecht', 'Naja', 'Ganz okay', 'Gut', 'Großartig'];
+const ratingId = (movieId, who) => `${movieId}~${who}`;
+const ratingOf = (movieId, who) => DB.get('ratings', ratingId(movieId, who))?.stars || 0;
+const starText = (n) => '★'.repeat(n) + '☆'.repeat(5 - n);
+
+// Der Film, den ihr zusammen am besten fandet. Nur Filme, die beide bewertet haben.
+function favoriteMovie(seen) {
+  let best = null;
+  let bestSum = 0;
+  seen.forEach((m) => {
+    const stars = COUPLE.people.map((p) => ratingOf(m.id, p));
+    if (stars.some((s) => !s)) return;
+    const sum = stars[0] + stars[1];
+    if (sum > bestSum) { best = m.id; bestSum = sum; }
+  });
+  return best;
+}
+
+function ratingBlock(m) {
+  const mine = ratingOf(m.id, me);
+  const lines = COUPLE.people.map((p) => {
+    const s = ratingOf(m.id, p);
+    if (!s) return `<span class="rate-line muted">${esc(p)} hat noch nicht bewertet</span>`;
+    // Die Sterne vom anderen gibt es erst, wenn man selbst bewertet hat.
+    if (p !== me && !mine) return `<span class="rate-line muted">${esc(p)} hat schon bewertet</span>`;
+    return `<span class="rate-line ${ownerClass(p)}">${esc(p)} <b>${starText(s)}</b></span>`;
+  }).join('');
+  const [a, b] = COUPLE.people.map((p) => ratingOf(m.id, p));
+  let verdict = '';
+  if (a && b && mine) {
+    verdict = a === b ? 'Ihr seid euch einig ❤' : `${a > b ? COUPLE.people[0] : COUPLE.people[1]} fand ihn besser`;
+  }
+  return `
+    <div class="rating">
+      ${lines}
+      <div class="rate-foot">
+        ${verdict ? `<span class="verdict">${esc(verdict)}</span>` : ''}
+        <button class="rate-btn" data-action="movie-rate" data-id="${esc(m.id)}">${mine ? 'Ändern' : 'Bewerten'}</button>
+      </div>
+    </div>`;
+}
+
+function openRating(id) {
+  const m = DB.get('movies', id);
+  if (!m) return;
+  const mine = ratingOf(id, me);
+  const theirs = ratingOf(id, other());
+  UI.rateStars = mine;
+  openOverlay(`
+    <div class="sheet center pop">
+      <p class="eyebrow">Gesehen</p>
+      <h2 class="rate-title">Wie fandest du ${esc(m.title)}?</h2>
+      ${theirs && !mine ? `<p class="muted">${esc(other())} hat schon bewertet. Die Sterne siehst du danach.</p>` : ''}
+      <div class="star-row" role="group" aria-label="Sterne">
+        ${[1, 2, 3, 4, 5].map((n) => `<button class="star ${n <= mine ? 'on' : ''}" data-action="rate-star" data-n="${n}" aria-label="${n} ${n === 1 ? 'Stern' : 'Sterne'}">★</button>`).join('')}
+      </div>
+      <p class="muted" id="rate-word">${mine ? RATING_WORDS[mine - 1] : 'Tipp auf die Sterne'}</p>
+      <div class="sheet-actions">
+        <button class="btn ghost" data-action="close">Später</button>
+        <button class="btn primary" data-action="rate-save" data-id="${esc(id)}">Speichern</button>
+      </div>
+    </div>`);
 }
 
 function moviePick() {
@@ -1085,7 +1157,29 @@ const ACTIONS = {
   'food-reset-yes': () => { closeOverlay(); DB.clear('swipes'); toast('Neue Runde, wischt los'); },
   'movie-filter': (d) => { UI.movieFilter = d.to; render(); },
   'movie-pick': moviePick,
-  'movie-toggle': (d) => { const m = DB.get('movies', d.id); if (m) DB.put('movies', { ...m, watched: !m.watched }); },
+  'movie-toggle': (d) => {
+    const m = DB.get('movies', d.id);
+    if (!m) return;
+    DB.put('movies', { ...m, watched: !m.watched });
+    // Wer abhakt, wird gleich nach seiner Meinung gefragt.
+    if (!m.watched && !ratingOf(m.id, me)) openRating(m.id);
+  },
+  'movie-rate': (d) => openRating(d.id),
+  'rate-star': (d) => {
+    const n = Number(d.n);
+    UI.rateStars = n;
+    document.querySelectorAll('.star-row .star').forEach((s, i) => s.classList.toggle('on', i < n));
+    const word = document.getElementById('rate-word');
+    word.textContent = RATING_WORDS[n - 1];
+    word.classList.add('picked');
+  },
+  'rate-save': (d) => {
+    if (!UI.rateStars) { toast('Tipp erst auf die Sterne'); return; }
+    DB.put('ratings', { id: ratingId(d.id, me), movie: d.id, by: me, stars: UI.rateStars, at: Date.now() });
+    closeOverlay();
+    UI.movieFilter = 'seen';
+    render();
+  },
   'movie-remove': (d) => removeWithUndo('movies', d.id, DB.get('movies', d.id)?.title),
   season: (d) => { UI.season = d.to; render(); },
   'bucket-toggle': (d, el) => {
