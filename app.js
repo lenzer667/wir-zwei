@@ -807,7 +807,7 @@ const ACTIONS = {
     closeOverlay();
     try {
       const reg = await navigator.serviceWorker.ready;
-      await reg.showNotification('Test von Wir zwei', { body: 'Wenn du das siehst, kann dein Handy Benachrichtigungen anzeigen.', icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', tag: 'test' });
+      await reg.showNotification('Test von Wir zwei', { body: 'Wenn du das siehst, kann dein Handy Benachrichtigungen anzeigen.', icon: 'icons/icon-192.png', badge: 'icons/badge.png', tag: 'test' });
       toast('Test geschickt. Schau oben in die Leiste.');
     } catch (err) {
       toast('Test hat nicht geklappt: ' + (err && err.message ? err.message : 'unbekannter Fehler'));

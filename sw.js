@@ -1,5 +1,5 @@
 // Netzwerk zuerst, damit Updates sofort ankommen. Ohne Internet startet die App aus dem Cache.
-const CACHE = 'wirzwei-v21';
+const CACHE = 'wirzwei-v22';
 
 // Benachrichtigungen: Supabase schickt Titel und Ziel, das Handy zeigt sie an.
 self.addEventListener('push', (e) => {
@@ -8,7 +8,8 @@ self.addEventListener('push', (e) => {
   e.waitUntil(self.registration.showNotification(d.title || 'Wir zwei', {
     body: d.body || '',
     icon: 'icons/icon-192.png',
-    badge: 'icons/icon-192.png',
+    // Android zeigt hier nur die Umrisse in Weiß, deshalb ein freigestelltes Herz.
+    badge: 'icons/badge.png',
     tag: d.tag || undefined,
     data: { url: d.url || './' },
   }));
@@ -26,7 +27,7 @@ self.addEventListener('notificationclick', (e) => {
     })
   );
 });
-const SHELL = ['./', 'index.html', 'styles.css', 'data.js', 'store.js', 'figuren-seite.js', 'decor.js', 'game.js', 'app.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'assets/herbst.jpg'];
+const SHELL = ['./', 'index.html', 'styles.css', 'data.js', 'store.js', 'figuren-seite.js', 'decor.js', 'game.js', 'app.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/badge.png', 'assets/herbst.jpg'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
