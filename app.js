@@ -593,41 +593,48 @@ function viewCalendar() {
           <span class="cal-bar" aria-hidden="true"></span>
           <span class="cal-event-ic" aria-hidden="true">${ownerClass(e.owner) === 'both' && !e.icon ? HEART_SPLIT : esc(e.icon || '')}</span>
           <div class="item-body"><strong>${esc(e.title)}</strong><small>${eventTime(e)} · ${esc(ownerLabel(e.owner))}${e.repeat === 'weekly' ? ' · jede Woche' : ''}</small></div>
+          <button class="del" data-action="cal-edit" data-id="${esc(e.id)}" aria-label="${esc(e.title)} bearbeiten">✏️</button>
           <button class="del" data-action="cal-remove" data-id="${esc(e.id)}" aria-label="${esc(e.title)} löschen">✕</button>
         </li>`).join('')}</ul>` : '<p class="muted empty-line">Noch nichts eingetragen.</p>'}
     </section>
   `;
 }
 
-function calForm() {
+// Ohne Termin: neuer Termin. Mit Termin: dasselbe Formular, schon ausgefüllt.
+function calForm(ev = null) {
   const others = COUPLE.people.filter((p) => p !== me);
   const owners = [[me, 'Ich'], ...others.map((p) => [p, p]), ['both', 'Zusammen']];
+  const ownerNow = ev ? ev.owner : me;
+  const iconNow = ev ? (ev.icon || '') : '';
+  const allDayNow = ev ? !!ev.allDay : false;
   openOverlay(`
     <form class="sheet cal-form" data-form="event">
-      <h2>Neuer Termin</h2>
+      <h2>${ev ? 'Termin bearbeiten' : 'Neuer Termin'}</h2>
+      ${ev ? `<input type="hidden" name="id" value="${esc(ev.id)}">` : ''}
       <label for="ev-title">Was?</label>
-      <input id="ev-title" name="title" maxlength="60" required placeholder="z. B. Volleyball-Training" autocomplete="off">
+      <input id="ev-title" name="title" maxlength="60" required placeholder="z. B. Volleyball-Training" autocomplete="off" value="${ev ? esc(ev.title) : ''}">
 
       <span class="cal-label">Für wen?</span>
       <div class="seg cal-owner">
-        ${owners.map(([v, l], i) => `<label><input type="radio" name="owner" value="${esc(v)}" ${i === 0 ? 'checked' : ''}><span class="${ownerClass(v)}">${esc(l)}</span></label>`).join('')}
+        ${owners.map(([v, l]) => `<label><input type="radio" name="owner" value="${esc(v)}" ${v === ownerNow ? 'checked' : ''}><span class="${ownerClass(v)}">${esc(l)}</span></label>`).join('')}
       </div>
 
       <label for="ev-date">Tag</label>
-      <input id="ev-date" name="date" type="date" required value="${UI.calDay}">
+      <input id="ev-date" name="date" type="date" required value="${ev ? esc(ev.date) : UI.calDay}">
 
-      <label class="check-row"><input type="checkbox" name="allDay" id="ev-allday"> Ganztägig</label>
-      <div class="time-row" id="ev-times">
-        <label>Von <input name="start" type="time" value="18:00"></label>
-        <label>Bis <input name="end" type="time" value="20:00"></label>
+      <label class="check-row"><input type="checkbox" name="allDay" id="ev-allday" ${allDayNow ? 'checked' : ''}> Ganztägig</label>
+      <div class="time-row ${allDayNow ? 'off' : ''}" id="ev-times">
+        <label>Von <input name="start" type="time" value="${ev && ev.start ? esc(ev.start) : '18:00'}" ${allDayNow ? 'disabled' : ''}></label>
+        <label>Bis <input name="end" type="time" value="${ev && !ev.allDay ? esc(ev.end || '') : '20:00'}" ${allDayNow ? 'disabled' : ''}></label>
       </div>
 
       <span class="cal-label">Symbol über dem Tag</span>
       <div class="icon-pick">
-        ${CAL_ICONS.map(([ic, l], i) => `<label title="${l}"><input type="radio" name="icon" value="${ic}" ${i === 0 ? 'checked' : ''}><span>${ic || '–'}</span></label>`).join('')}
+        ${CAL_ICONS.map(([ic, l]) => `<label title="${l}"><input type="radio" name="icon" value="${ic}" ${ic === iconNow ? 'checked' : ''}><span>${ic || '–'}</span></label>`).join('')}
       </div>
 
-      <label class="check-row"><input type="checkbox" name="repeat" value="weekly"> Jede Woche wiederholen</label>
+      <label class="check-row"><input type="checkbox" name="repeat" value="weekly" ${ev && ev.repeat === 'weekly' ? 'checked' : ''}> Jede Woche wiederholen</label>
+      ${ev && ev.repeat === 'weekly' ? '<p class="muted cal-hint">Änderungen gelten für alle Wochen.</p>' : ''}
 
       <div class="sheet-actions">
         <button type="button" class="btn ghost" data-action="close">Abbrechen</button>
@@ -991,7 +998,8 @@ const ACTIONS = {
     render();
   },
   'cal-day': (d) => { UI.calDay = d.to; render(); },
-  'cal-add': calForm,
+  'cal-add': () => calForm(),
+  'cal-edit': (d) => { const ev = DB.get('events', d.id); if (ev) calForm(ev); },
   'cal-remove': (d) => removeWithUndo('events', d.id, DB.get('events', d.id)?.title || 'Termin'),
   'push-enable': () => { closeOverlay(); enablePush(); },
   // Zeigt direkt auf diesem Handy eine Benachrichtigung, ganz ohne Server.
@@ -1107,16 +1115,19 @@ const FORMS = {
     const allDay = f.allDay === 'on';
     if (!allDay && !f.start) { toast('Bitte eine Startzeit wählen oder ganztägig ankreuzen'); return false; }
     if (!allDay && f.end && f.end < f.start) { toast('Das Ende liegt vor dem Anfang'); return false; }
+    const old = f.id ? DB.get('events', f.id) : null;
     DB.put('events', {
-      id: uid(), title: f.title, owner: f.owner || me, date: f.date, allDay,
+      ...(old || {}),
+      id: old ? old.id : uid(), title: f.title, owner: f.owner || me, date: f.date, allDay,
       start: allDay ? '' : f.start, end: allDay ? '' : (f.end || ''),
-      icon: f.icon || '', repeat: f.repeat === 'weekly' ? 'weekly' : '', by: me, at: Date.now(),
+      icon: f.icon || '', repeat: f.repeat === 'weekly' ? 'weekly' : '',
+      by: old ? old.by : me, at: old ? old.at : Date.now(), ...(old ? { editedBy: me, editedAt: Date.now() } : {}),
     });
     UI.calDay = f.date;
     const d = fromIso(f.date);
     UI.calMonth = new Date(d.getFullYear(), d.getMonth(), 1);
     closeOverlay();
-    toast('Termin gespeichert');
+    toast(old ? 'Termin geändert' : 'Termin gespeichert');
   },
   wish: (f) => {
     DB.put('wishes', { id: uid(), text: f.text, by: me, at: Date.now(), status: 'open', seen: false, noticed: false });
