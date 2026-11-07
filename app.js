@@ -780,7 +780,7 @@ const ACTIONS = {
       <h2>Hey ${esc(me)}</h2>
       <button class="btn primary wide" data-action="open-wishes">✨ Wünsche für die App</button>
       ${!pushSupported() ? '' : pushGranted()
-        ? '<p class="muted push-on">🔔 Benachrichtigungen sind an</p>'
+        ? '<p class="muted push-on">🔔 Benachrichtigungen sind an</p><button class="btn ghost wide" data-action="push-test">Test-Benachrichtigung senden</button>'
         : Notification.permission === 'denied'
           ? '<p class="muted push-on">🔕 Benachrichtigungen sind blockiert. Erlauben kannst du sie in Chrome über das Schloss neben der Adresse oder in den App-Einstellungen des Handys.</p>'
           : '<button class="btn ghost wide" data-action="push-enable">🔔 Benachrichtigungen einschalten</button>'}
@@ -801,6 +801,18 @@ const ACTIONS = {
   },
   'game-start': (d) => VolleyGame.start({ mode: d.mode, me, onClose: render }),
   'push-enable': () => { closeOverlay(); enablePush(); },
+  // Zeigt direkt auf diesem Handy eine Benachrichtigung, ganz ohne Server.
+  // Erscheint sie nicht, liegt es an den Einstellungen des Handys.
+  'push-test': async () => {
+    closeOverlay();
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      await reg.showNotification('Test von Wir zwei', { body: 'Wenn du das siehst, kann dein Handy Benachrichtigungen anzeigen.', icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', tag: 'test' });
+      toast('Test geschickt. Schau oben in die Leiste.');
+    } catch (err) {
+      toast('Test hat nicht geklappt: ' + (err && err.message ? err.message : 'unbekannter Fehler'));
+    }
+  },
   'push-later': () => {
     try { localStorage.setItem(PUSH_LATER_KEY, '1'); } catch {}
     render();
