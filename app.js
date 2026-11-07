@@ -229,6 +229,8 @@ function viewFood() {
   const stack = deck.slice(0, 3).reverse();
 
   return `
+    ${listSwitch('food')}
+
     <header class="page-head">
       <h1>Was essen wir?</h1>
       <p class="muted">Wischt beide durch. Rechts heißt ja, links heißt nein.</p>
@@ -800,14 +802,16 @@ function viewGame() {
 
 // ---------- Rendern ----------
 const VIEWS = { home: viewHome, calendar: viewCalendar, food: viewFood, movies: viewMovies, bucket: viewBucket, game: viewGame, wishes: viewWishes };
-const NAV = [['home', 'Wir'], ['calendar', 'Kalender'], ['food', 'Essen'], ['bucket', 'Listen'], ['game', 'Spielen']];
-// Die Filme liegen jetzt im Bereich Listen.
-const navOn = (k) => UI.view === k || (k === 'bucket' && UI.view === 'movies');
+const NAV = [['home', 'Wir'], ['calendar', 'Kalender'], ['bucket', 'Listen'], ['game', 'Spielen']];
+// Filme und Essen liegen im Bereich Listen.
+const LIST_VIEWS = ['bucket', 'food', 'movies'];
+const navOn = (k) => UI.view === k || (k === 'bucket' && LIST_VIEWS.includes(UI.view));
 
-// Umschalter zwischen Bucket Lists und Filmen
+// Umschalter zwischen Bucket Lists, Essen und Filmen
 const listSwitch = (active) => `
   <div class="tabs list-switch">
     <button class="${active === 'bucket' ? 'on' : ''}" data-action="nav" data-to="bucket">Bucket Lists</button>
+    <button class="${active === 'food' ? 'on' : ''}" data-action="nav" data-to="food">Essen</button>
     <button class="${active === 'movies' ? 'on' : ''}" data-action="nav" data-to="movies">Filme</button>
   </div>`;
 
