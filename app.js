@@ -697,17 +697,40 @@ const ownerLabel = (o) => (o === 'both' ? 'Zusammen' : o);
 
 const HEART_SPLIT = `<svg class="heart-split" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="heart-split" x1="0" x2="1"><stop offset=".5" style="stop-color:var(--timm)"/><stop offset=".5" style="stop-color:var(--fenja)"/></linearGradient></defs><path d="M12 21C5.5 16.5 3 13 3 9.5 3 7 5 5 7.4 5c1.9 0 3.5 1 4.6 3 1.1-2 2.7-3 4.6-3C19 5 21 7 21 9.5c0 3.5-2.5 7-9 11.5Z" fill="url(#heart-split)"/></svg>`;
 
-// Alle Termine eines Tages, auch wöchentlich wiederholte.
-function eventsOn(dayIso) {
-  const day = fromIso(dayIso);
-  return DB.list('events').filter((e) => {
-    if (e.date === dayIso) return true;
-    if (e.repeat !== 'weekly' || e.date > dayIso) return false;
-    return fromIso(e.date).getDay() === day.getDay();
-  }).sort((a, b) => (b.allDay - a.allDay) || String(a.start).localeCompare(String(b.start)));
+// Wie viele Tage ein Termin nach dem ersten noch dauert (0 = nur ein Tag).
+const eventSpan = (e) => (e.endDate && e.endDate > e.date ? dayDiff(fromIso(e.date), fromIso(e.endDate)) : 0);
+
+// Der wievielte Tag des Termins dayIso ist (0 = erster Tag), oder -1 wenn der Termin dort nicht liegt.
+// Mehrtägige Termine liegen auf jedem Tag dazwischen, wöchentliche wiederholen sich mit derselben Länge.
+function eventDayIndex(e, dayIso) {
+  const diff = dayDiff(fromIso(e.date), fromIso(dayIso));
+  if (diff < 0) return -1;
+  const span = eventSpan(e);
+  if (diff <= span) return diff;
+  if (e.repeat !== 'weekly') return -1;
+  return diff % 7 <= span ? diff % 7 : -1;
 }
 
-const eventTime = (e) => (e.allDay ? 'Ganztägig' : e.end ? `${e.start}–${e.end}` : `ab ${e.start}`);
+// Alle Termine eines Tages, auch mehrtägige und wöchentlich wiederholte.
+function eventsOn(dayIso) {
+  return DB.list('events').filter((e) => eventDayIndex(e, dayIso) >= 0)
+    .sort((a, b) => (b.allDay - a.allDay) || String(a.start).localeCompare(String(b.start)));
+}
+
+const dayMonth = (iso) => fromIso(iso).toLocaleDateString('de-DE', { day: 'numeric', month: 'numeric' });
+
+// Zeitangabe für die Liste. Mehrtägig: Zeitraum, welcher Tag, am ersten Tag die Start- und am letzten die Endzeit.
+function eventTime(e, dayIso) {
+  const span = eventSpan(e);
+  if (!span) return e.allDay ? 'Ganztägig' : e.end ? `${e.start}–${e.end}` : `ab ${e.start}`;
+  const i = eventDayIndex(e, dayIso);
+  const parts = [];
+  if (e.repeat !== 'weekly') parts.push(`${dayMonth(e.date)}–${dayMonth(e.endDate)}`);
+  parts.push(`Tag ${i + 1} von ${span + 1}`);
+  if (!e.allDay && i === 0 && e.start) parts.push(`ab ${e.start}`);
+  if (!e.allDay && i === span && e.end) parts.push(`bis ${e.end}`);
+  return parts.join(' · ');
+}
 
 function calBadge(e) {
   const cls = ownerClass(e.owner);
@@ -764,7 +787,7 @@ function viewCalendar() {
         <li class="item cal-event ${ownerClass(e.owner)}">
           <span class="cal-bar" aria-hidden="true"></span>
           <span class="cal-event-ic" aria-hidden="true">${ownerClass(e.owner) === 'both' && !e.icon ? HEART_SPLIT : esc(e.icon || '')}</span>
-          <div class="item-body"><strong>${esc(e.title)}</strong><small>${eventTime(e)} · ${esc(ownerLabel(e.owner))}${e.repeat === 'weekly' ? ' · jede Woche' : ''}</small></div>
+          <div class="item-body"><strong>${esc(e.title)}</strong><small>${eventTime(e, selected)} ·${esc(ownerLabel(e.owner))}${e.repeat === 'weekly' ? ' · jede Woche' : ''}</small></div>
           <button class="del" data-action="cal-edit" data-id="${esc(e.id)}" aria-label="${esc(e.title)} bearbeiten">✏️</button>
           <button class="del" data-action="cal-remove" data-id="${esc(e.id)}" aria-label="${esc(e.title)} löschen">✕</button>
         </li>`).join('')}</ul>` : '<p class="muted empty-line">Noch nichts eingetragen.</p>'}
@@ -779,6 +802,8 @@ function calForm(ev = null) {
   const ownerNow = ev ? ev.owner : me;
   const iconNow = ev ? (ev.icon || '') : '';
   const allDayNow = ev ? !!ev.allDay : false;
+  const multiNow = !!(ev && eventSpan(ev));
+  const dateNow = ev ? esc(ev.date) : UI.calDay;
   openOverlay(`
     <form class="sheet cal-form" data-form="event">
       <h2>${ev ? 'Termin bearbeiten' : 'Neuer Termin'}</h2>
@@ -791,13 +816,16 @@ function calForm(ev = null) {
         ${owners.map(([v, l]) => `<label><input type="radio" name="owner" value="${esc(v)}" ${v === ownerNow ? 'checked' : ''}><span class="${ownerClass(v)}">${esc(l)}</span></label>`).join('')}
       </div>
 
-      <label for="ev-date">Tag</label>
-      <input id="ev-date" name="date" type="date" required value="${ev ? esc(ev.date) : UI.calDay}">
+      <label class="check-row"><input type="checkbox" id="ev-multi" ${multiNow ? 'checked' : ''}> Mehrere Tage</label>
+      <div class="time-row ${multiNow ? '' : 'one'}" id="ev-dates">
+        <label><span id="ev-date-label">${multiNow ? 'Erster Tag' : 'Tag'}</span><input id="ev-date" name="date" type="date" required value="${dateNow}"></label>
+        <label id="ev-end-wrap" class="${multiNow ? '' : 'hidden'}">Letzter Tag<input id="ev-enddate" name="endDate" type="date" min="${dateNow}" value="${multiNow ? esc(ev.endDate) : ''}" ${multiNow ? '' : 'disabled'}></label>
+      </div>
 
       <label class="check-row"><input type="checkbox" name="allDay" id="ev-allday" ${allDayNow ? 'checked' : ''}> Ganztägig</label>
       <div class="time-row ${allDayNow ? 'off' : ''}" id="ev-times">
-        <label>Von <input name="start" type="time" value="${ev && ev.start ? esc(ev.start) : '18:00'}" ${allDayNow ? 'disabled' : ''}></label>
-        <label>Bis <input name="end" type="time" value="${ev && !ev.allDay ? esc(ev.end || '') : '20:00'}" ${allDayNow ? 'disabled' : ''}></label>
+        <label><span id="ev-start-label">${multiNow ? 'Start am ersten Tag' : 'Von'}</span><input name="start" type="time" value="${ev && ev.start ? esc(ev.start) : '18:00'}" ${allDayNow ? 'disabled' : ''}></label>
+        <label><span id="ev-end-label">${multiNow ? 'Ende am letzten Tag' : 'Bis'}</span><input name="end" type="time" value="${ev && !ev.allDay ? esc(ev.end || '') : '20:00'}" ${allDayNow ? 'disabled' : ''}></label>
       </div>
 
       <span class="cal-label">Symbol über dem Tag</span>
@@ -818,6 +846,27 @@ function calForm(ev = null) {
   allDay.addEventListener('change', () => {
     times.classList.toggle('off', allDay.checked);
     times.querySelectorAll('input').forEach((i) => { i.disabled = allDay.checked; });
+  });
+  // Mehrere Tage: zweites Datumsfeld zeigen, es kann nicht vor dem ersten Tag liegen
+  const multi = document.getElementById('ev-multi');
+  const start = document.getElementById('ev-date');
+  const endDate = document.getElementById('ev-enddate');
+  multi.addEventListener('change', () => {
+    document.getElementById('ev-end-wrap').classList.toggle('hidden', !multi.checked);
+    document.getElementById('ev-dates').classList.toggle('one', !multi.checked);
+    endDate.disabled = !multi.checked;
+    if (multi.checked && (!endDate.value || endDate.value <= start.value)) {
+      const next = fromIso(start.value);
+      next.setDate(next.getDate() + 1);
+      endDate.value = isoDay(next);
+    }
+    document.getElementById('ev-date-label').textContent = multi.checked ? 'Erster Tag' : 'Tag';
+    document.getElementById('ev-start-label').textContent = multi.checked ? 'Start am ersten Tag' : 'Von';
+    document.getElementById('ev-end-label').textContent = multi.checked ? 'Ende am letzten Tag' : 'Bis';
+  });
+  start.addEventListener('change', () => {
+    endDate.min = start.value;
+    if (endDate.value && endDate.value < start.value) endDate.value = start.value;
   });
 }
 
@@ -1351,11 +1400,14 @@ const FORMS = {
     if (!f.title || !f.date) { toast('Bitte Titel und Tag angeben'); return false; }
     const allDay = f.allDay === 'on';
     if (!allDay && !f.start) { toast('Bitte eine Startzeit wählen oder ganztägig ankreuzen'); return false; }
-    if (!allDay && f.end && f.end < f.start) { toast('Das Ende liegt vor dem Anfang'); return false; }
+    // Letzter Tag nur, wenn er wirklich nach dem ersten liegt
+    const endDate = f.endDate && f.endDate > f.date ? f.endDate : '';
+    if (f.endDate && f.endDate < f.date) { toast('Der letzte Tag liegt vor dem ersten'); return false; }
+    if (!endDate && !allDay && f.end && f.end < f.start) { toast('Das Ende liegt vor dem Anfang'); return false; }
     const old = f.id ? DB.get('events', f.id) : null;
     DB.put('events', {
       ...(old || {}),
-      id: old ? old.id : uid(), title: f.title, owner: f.owner || me, date: f.date, allDay,
+      id: old ? old.id : uid(), title: f.title, owner: f.owner || me, date: f.date, endDate, allDay,
       start: allDay ? '' : f.start, end: allDay ? '' : (f.end || ''),
       icon: f.icon || '', repeat: f.repeat === 'weekly' ? 'weekly' : '',
       by: old ? old.by : me, at: old ? old.at : Date.now(), ...(old ? { editedBy: me, editedAt: Date.now() } : {}),

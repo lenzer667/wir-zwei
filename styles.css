@@ -1126,6 +1126,7 @@ body[data-list='summer'] #app { padding-top: calc(14px + env(safe-area-inset-top
 .check-row { display: flex; align-items: center; gap: 8px; min-height: 40px; font-weight: 600; }
 .check-row input { width: 20px; height: 20px; accent-color: var(--amber); }
 .time-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.time-row.one { grid-template-columns: 1fr; }
 .time-row label { display: flex; flex-direction: column; gap: 3px; color: var(--muted); font-size: 13px; }
 .time-row.off { opacity: 0.4; }
 .icon-pick { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
