@@ -433,7 +433,12 @@ function viewMovies() {
 const RATING_WORDS = ['Schlecht', 'Naja', 'Ganz okay', 'Gut', 'Großartig'];
 const ratingId = (movieId, who) => `${movieId}~${who}`;
 const ratingOf = (movieId, who) => DB.get('ratings', ratingId(movieId, who))?.stars || 0;
-const starText = (n) => '★'.repeat(n) + '☆'.repeat(5 - n);
+// Bewertungen gehen in halben Schritten von 0,5 bis 5. Jeder Stern wird anteilig gefüllt.
+const starNumber = (n) => String(n).replace('.', ',');
+const starWord = (n) => `${RATING_WORDS[Math.ceil(n) - 1]} · ${starNumber(n)}`;
+const starFill = (n, i) => Math.max(0, Math.min(1, n - i)) * 100;
+const starIcon = (fill) => `<i class="st" style="--f:${fill}%" aria-hidden="true">★</i>`;
+const starsHtml = (n) => `<span class="stars" role="img" aria-label="${starNumber(n)} von 5 Sternen">${[0, 1, 2, 3, 4].map((i) => starIcon(starFill(n, i))).join('')}</span>`;
 
 // Der Film, den ihr zusammen am besten fandet. Nur Filme, die beide bewertet haben.
 function favoriteMovie(seen) {
@@ -455,7 +460,7 @@ function ratingBlock(m) {
     if (!s) return `<span class="rate-line muted">${esc(p)} hat noch nicht bewertet</span>`;
     // Die Sterne vom anderen gibt es erst, wenn man selbst bewertet hat.
     if (p !== me && !mine) return `<span class="rate-line muted">${esc(p)} hat schon bewertet</span>`;
-    return `<span class="rate-line ${ownerClass(p)}">${esc(p)} <b>${starText(s)}</b></span>`;
+    return `<span class="rate-line ${ownerClass(p)}">${esc(p)} ${starsHtml(s)}</span>`;
   }).join('');
   const [a, b] = COUPLE.people.map((p) => ratingOf(m.id, p));
   let verdict = '';
@@ -484,9 +489,9 @@ function openRating(id) {
       <h2 class="rate-title">Wie fandest du ${esc(m.title)}?</h2>
       ${theirs && !mine ? `<p class="muted">${esc(other())} hat schon bewertet. Die Sterne siehst du danach.</p>` : ''}
       <div class="star-row" role="group" aria-label="Sterne">
-        ${[1, 2, 3, 4, 5].map((n) => `<button class="star ${n <= mine ? 'on' : ''}" data-action="rate-star" data-n="${n}" aria-label="${n} ${n === 1 ? 'Stern' : 'Sterne'}">★</button>`).join('')}
+        ${[0, 1, 2, 3, 4].map((i) => `<span class="pick-star">${starIcon(starFill(mine, i))}${[i + 0.5, i + 1].map((n) => `<button data-action="rate-star" data-n="${n}" aria-label="${starNumber(n)} ${n === 1 ? 'Stern' : 'Sterne'}"></button>`).join('')}</span>`).join('')}
       </div>
-      <p class="muted" id="rate-word">${mine ? RATING_WORDS[mine - 1] : 'Tipp auf die Sterne'}</p>
+      <p class="muted" id="rate-word">${mine ? starWord(mine) : 'Linke Hälfte für halbe Sterne'}</p>
       <div class="sheet-actions">
         <button class="btn ghost" data-action="close">Später</button>
         <button class="btn primary" data-action="rate-save" data-id="${esc(id)}">Speichern</button>
@@ -1210,9 +1215,9 @@ const ACTIONS = {
   'rate-star': (d) => {
     const n = Number(d.n);
     UI.rateStars = n;
-    document.querySelectorAll('.star-row .star').forEach((s, i) => s.classList.toggle('on', i < n));
+    document.querySelectorAll('.star-row .st').forEach((s, i) => s.style.setProperty('--f', `${starFill(n, i)}%`));
     const word = document.getElementById('rate-word');
-    word.textContent = RATING_WORDS[n - 1];
+    word.textContent = starWord(n);
     word.classList.add('picked');
   },
   'rate-save': (d) => {

@@ -302,9 +302,24 @@ textarea { display: block; resize: none; margin-bottom: 10px; }
 .item.done.fav strong { color: inherit; text-decoration: none; }
 .fav-label { display: block; color: var(--amber); font-size: 12px; }
 .rate-title { font-size: 24px; overflow-wrap: anywhere; }
+/* Ein Stern wird bis --f gefüllt, so gehen auch halbe Sterne */
+.st {
+  --sc: var(--amber);
+  font-style: normal;
+  background: linear-gradient(90deg, var(--sc) var(--f), rgba(255, 221, 190, 0.2) var(--f));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.stars { display: inline-flex; gap: 1px; }
+.rate-line.timm .st { --sc: var(--timm); }
+.rate-line.fenja .st { --sc: var(--fenja); }
 .star-row { display: flex; gap: 4px; }
-.star { width: 48px; height: 48px; font-size: 36px; line-height: 1; color: rgba(255, 221, 190, 0.2); transition: color 0.15s, transform 0.15s; }
-.star.on { color: var(--amber); transform: scale(1.08); }
+/* Zwei unsichtbare Knöpfe pro Stern: links halber, rechts ganzer Stern */
+.pick-star { position: relative; display: grid; place-items: center; width: 48px; height: 48px; font-size: 38px; line-height: 1; }
+.pick-star button { position: absolute; top: 0; bottom: 0; width: 50%; }
+.pick-star button:first-of-type { left: 0; }
+.pick-star button:last-of-type { right: 0; }
 #rate-word.picked { color: var(--amber); }
 .item.done strong { color: var(--muted); text-decoration: line-through; }
 .del { flex: none; width: 44px; height: 44px; color: var(--muted); font-size: 14px; opacity: 0.7; }
