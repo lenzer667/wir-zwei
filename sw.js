@@ -1,5 +1,5 @@
 // Netzwerk zuerst, damit Updates sofort ankommen. Ohne Internet startet die App aus dem Cache.
-const CACHE = 'wirzwei-v33';
+const CACHE = 'wirzwei-v34';
 
 // Benachrichtigungen: Supabase schickt Titel und Ziel, das Handy zeigt sie an.
 self.addEventListener('push', (e) => {

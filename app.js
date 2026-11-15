@@ -150,6 +150,8 @@ function viewHome() {
 
     ${todayMs ? `<section class="card today-ms"><p class="eyebrow">Heute ist es so weit</p><h2>${esc(todayMs.label)}!</h2><p>Herzlichen Glückwunsch, ihr zwei.</p></section>` : ''}
 
+    ${todayCard()}
+
     <section class="card countdown">
       <div class="countdown-head">
         <div>
@@ -739,6 +741,23 @@ function calBadge(e) {
   return `<span class="cal-ic ${cls}">${esc(e.icon)}</span>`;
 }
 
+// Startseite: Was heute ansteht. Ohne Termine erscheint die Karte gar nicht.
+function todayCard() {
+  const iso = isoDay(today());
+  const evs = eventsOn(iso);
+  if (!evs.length) return '';
+  return `
+    <button class="card today-card" data-action="open-today" aria-label="Heute im Kalender öffnen">
+      <p class="eyebrow">Heute</p>
+      <ul class="today-list">${evs.map((e) => `
+        <li class="cal-event ${ownerClass(e.owner)}">
+          <span class="cal-bar" aria-hidden="true"></span>
+          <span class="cal-event-ic" aria-hidden="true">${ownerClass(e.owner) === 'both' && !e.icon ? HEART_SPLIT : esc(e.icon || '')}</span>
+          <span class="item-body"><strong>${esc(e.title)}</strong><small>${eventTime(e, iso)} · ${esc(ownerLabel(e.owner))}</small></span>
+        </li>`).join('')}</ul>
+    </button>`;
+}
+
 function viewCalendar() {
   const month = UI.calMonth;
   const todayIso = isoDay(today());
@@ -1251,6 +1270,12 @@ const ACTIONS = {
     render();
   },
   'cal-day': (d) => { UI.calDay = d.to; render(); },
+  'open-today': () => {
+    const now = today();
+    UI.calDay = isoDay(now);
+    UI.calMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    goto('calendar');
+  },
   'cal-add': () => calForm(),
   'cal-edit': (d) => { const ev = DB.get('events', d.id); if (ev) calForm(ev); },
   'cal-remove': (d) => removeWithUndo('events', d.id, DB.get('events', d.id)?.title || 'Termin'),

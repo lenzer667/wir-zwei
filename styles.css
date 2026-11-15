@@ -1115,6 +1115,11 @@ body[data-list='summer'] #app { padding-top: calc(14px + env(safe-area-inset-top
 .cal-event-ic { flex: none; width: 26px; font-size: 20px; text-align: center; }
 .cal-event-ic .heart-split { width: 22px; height: 22px; display: block; margin: 0 auto; }
 .cal-event .del { width: 38px; }
+/* Startseite: Termine von heute */
+.today-card { display: block; width: 100%; text-align: left; }
+.today-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.today-list .cal-event { display: flex; align-items: center; min-height: 48px; border-radius: 12px; background: var(--surface-2); }
+.today-list .item-body small { display: block; }
 .cal-hint { margin-top: -4px; font-size: 12.5px; }
 .cal-form { gap: 7px; max-height: calc(100dvh - 32px); overflow-y: auto; }
 .cal-form label:not(.check-row):not(.seg label):not(.icon-pick label), .cal-label { color: var(--muted); font-size: 13px; }
