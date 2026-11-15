@@ -254,6 +254,10 @@ textarea { display: block; resize: none; margin-bottom: 10px; }
 .seg span { display: block; padding: 8px 14px; border-radius: 9px; color: var(--muted); font-size: 14px; font-weight: 500; cursor: pointer; }
 .seg input:checked + span { background: var(--text); color: #17131a; font-weight: 700; }
 .seg input:focus-visible + span { outline: 2px solid var(--amber); }
+/* Auswahl unter dem Zufallsknopf: Beides, nur Filme, nur Serien */
+.pick-kind { margin: -6px 0 14px; }
+.pick-kind button { flex: 1; padding: 7px 8px; border-radius: 9px; color: var(--muted); font-size: 13px; font-weight: 500; }
+.pick-kind button.on { background: var(--text); color: #17131a; font-weight: 700; }
 .tabs { display: flex; gap: 8px; }
 .tabs button { flex: 1; min-height: 44px; border-bottom: 2px solid var(--line); color: var(--muted); font-weight: 500; }
 .tabs button.on { border-color: var(--rose); color: var(--text); font-weight: 700; }

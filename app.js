@@ -54,7 +54,7 @@ const LOGIN_HASH = new RegExp(`^#(${COUPLE.people.map((p) => p.toLowerCase()).jo
 let me = localStorage.getItem(ME_KEY);
 const other = () => COUPLE.people.find((p) => p !== me);
 const UI = {
-  view: 'home', season: seasonOf(today()), movieFilter: 'open', noteSent: false, enter: true,
+  view: 'home', season: seasonOf(today()), movieFilter: 'open', pickKind: 'all', noteSent: false, enter: true,
   calMonth: new Date(today().getFullYear(), today().getMonth(), 1),
   calDay: `${today().getFullYear()}-${String(today().getMonth() + 1).padStart(2, '0')}-${String(today().getDate()).padStart(2, '0')}`,
 };
@@ -381,7 +381,8 @@ function viewMovies() {
   const open = all.filter((m) => !m.watched);
   const seen = all.filter((m) => m.watched);
   const list = UI.movieFilter === 'open' ? open : seen;
-  const fav = UI.movieFilter === 'seen' ? favoriteMovie(seen) : null;
+  const pool = pickPool();
+  const fav =UI.movieFilter === 'seen' ? favoriteMovie(seen) : null;
   const sortSeen = (l) => (fav ? [l.find((m) => m.id === fav), ...l.filter((m) => m.id !== fav)] : l);
 
   return `
@@ -392,10 +393,14 @@ function viewMovies() {
       <p class="muted">Sammelt, was ihr schauen wollt. Den Rest entscheidet der Zufall.</p>
     </header>
 
-    <button class="pick-btn" data-action="movie-pick" ${open.length ? '' : 'disabled'}>
+    <button class="pick-btn" data-action="movie-pick" ${pool.length ? '' : 'disabled'}>
       <span>🎲</span>
-      <span><strong>Was schauen wir heute?</strong><small>${open.length ? `Zufällig aus ${plural(open.length, 'Titel', 'Titeln')}` : 'Füge zuerst ein paar Titel hinzu'}</small></span>
+      <span><strong>Was schauen wir heute?</strong><small>${pool.length ? `Zufällig aus ${plural(pool.length, PICK_KINDS[UI.pickKind][1], PICK_KINDS[UI.pickKind][2])}`
+        : open.length ? `Keine ${PICK_KINDS[UI.pickKind][2]} auf der Liste` : 'Füge zuerst ein paar Titel hinzu'}</small></span>
     </button>
+    <div class="seg pick-kind" role="group" aria-label="Was soll gezogen werden?">
+      ${Object.entries(PICK_KINDS).map(([key, [label]]) => `<button class="${UI.pickKind === key ? 'on' : ''}" data-action="pick-kind" data-to="${key}" aria-pressed="${UI.pickKind === key}">${label}</button>`).join('')}
+    </div>
 
     <form class="movie-form" data-form="movie">
       <label class="sr" for="movie-title">Titel</label>
@@ -499,8 +504,12 @@ function openRating(id) {
     </div>`);
 }
 
+// Was der Zufall ziehen darf: Beschriftung, Einzahl und Mehrzahl für den Hinweis
+const PICK_KINDS = { all: ['Beides', 'Titel', 'Titeln'], Film: ['Nur Filme', 'Film', 'Filmen'], Serie: ['Nur Serien', 'Serie', 'Serien'] };
+const pickPool = () => DB.list('movies').filter((m) => !m.watched && (UI.pickKind === 'all' || m.kind === UI.pickKind));
+
 function moviePick() {
-  const open = DB.list('movies').filter((m) => !m.watched);
+  const open = pickPool();
   if (!open.length) return;
   openOverlay(`
     <div class="sheet center">
@@ -515,6 +524,8 @@ function moviePick() {
   const slot = document.getElementById('slot');
   const winner = open[Math.floor(Math.random() * open.length)];
   const finish = () => {
+    // Fenster schon wieder zu oder neu gewürfelt: nichts mehr zu tun
+    if (!slot.isConnected) return;
     slot.textContent = winner.title;
     slot.classList.add('landed');
     document.getElementById('slot-kind').textContent = `${winner.kind} · von ${winner.by}`;
@@ -1203,6 +1214,7 @@ const ACTIONS = {
     </div>`),
   'food-reset-yes': () => { closeOverlay(); DB.clear('swipes'); toast('Neue Runde, wischt los'); },
   'movie-filter': (d) => { UI.movieFilter = d.to; render(); },
+  'pick-kind': (d) => { UI.pickKind = d.to; render(); },
   'movie-pick': moviePick,
   'movie-toggle': (d) => {
     const m = DB.get('movies', d.id);
