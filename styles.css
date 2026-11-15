@@ -444,6 +444,14 @@ textarea { display: block; resize: none; margin-bottom: 10px; }
 .note-text { font: 500 25px/1.25 var(--display); overflow-wrap: anywhere; white-space: pre-wrap; }
 .slot { display: grid; place-items: center; min-height: 92px; font: 800 30px/1.1 var(--display); overflow-wrap: anywhere; }
 .slot.landed { background: var(--ember); -webkit-background-clip: text; background-clip: text; color: transparent; animation: pop 0.38s cubic-bezier(0.2, 1.4, 0.4, 1); }
+/* Glücksrad für den Filmabend */
+.wheel-wrap { position: relative; width: min(74vw, 290px); aspect-ratio: 1; margin: 2px auto 0; }
+.wheel { display: block; width: 100%; height: 100%; }
+.wheel-spin { transform-origin: 0 0; }
+.wheel-spin.spinning { transition: transform 4.6s cubic-bezier(0.12, 0.72, 0.12, 1); }
+.wheel-label { fill: #fff; font-family: var(--body, inherit); font-weight: 700; text-anchor: end; dominant-baseline: central; paint-order: stroke; stroke: rgba(0, 0, 0, 0.45); stroke-width: 1.6px; }
+.wheel-pointer { position: absolute; top: -8px; left: 50%; z-index: 1; width: 0; height: 0; border: 12px solid transparent; border-top: 22px solid var(--amber); border-bottom: 0; transform: translateX(-50%); filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5)); }
+.wheel-slot { min-height: 64px; font-size: 26px; }
 
 /* Toast */
 #toast {

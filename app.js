@@ -512,13 +512,58 @@ function openRating(id) {
 const PICK_KINDS = { all: ['Beides', 'Titel', 'Titeln'], Film: ['Nur Filme', 'Film', 'Filmen'], Serie: ['Nur Serien', 'Serie', 'Serien'] };
 const pickPool = () => DB.list('movies').filter((m) => !m.watched && (UI.pickKind === 'all' || m.kind === UI.pickKind));
 
+// Glücksrad: Jede Person bekommt gleich viel Platz auf dem Rad, egal wie viele Titel sie eingetragen hat.
+// Innerhalb ihres Teils sind alle ihre Titel gleich groß. So ist es erst 50:50 wer, dann Zufall welcher Film.
+const WHEEL_COLORS = { timm: ['#1f7a4a', '#2b9a5e'], fenja: ['#a3303e', '#c94352'], both: ['#6b5a52', '#82706a'] };
+
+function wheelSegments(pool) {
+  const owners = [...COUPLE.people, ...new Set(pool.map((m) => m.by))].filter((p, i, all) => all.indexOf(p) === i);
+  const groups = owners.map((p) => pool.filter((m) => m.by === p).sort((a, b) => a.at - b.at)).filter((g) => g.length);
+  const share = 360 / groups.length;
+  const segs = [];
+  groups.forEach((g, gi) => g.forEach((m, i) => {
+    const size = share / g.length;
+    const from = gi * share + i * size;
+    segs.push({ m, from, to: from + size, color: WHEEL_COLORS[ownerClass(m.by)][i % 2] });
+  }));
+  return { segs, groups };
+}
+
+function wheelSvg(segs) {
+  const R = 100;
+  const pt = (deg, r) => { const a = (deg * Math.PI) / 180; return `${(r * Math.sin(a)).toFixed(2)} ${(-r * Math.cos(a)).toFixed(2)}`; };
+  const parts = segs.map((s) => {
+    const span = s.to - s.from;
+    const shape = span >= 359.9
+      ? `<circle r="${R}" fill="${s.color}"/>`
+      : `<path d="M0 0L${pt(s.from, R)}A${R} ${R} 0 ${span > 180 ? 1 : 0} 1 ${pt(s.to, R)}Z" fill="${s.color}" stroke="#17100e" stroke-width=".8"/>`;
+    // Schrift läuft vom Rand zur Mitte, kleiner bei schmalen Feldern und langen Titeln
+    const title = s.m.title.length > 16 ? `${s.m.title.slice(0, 15)}…` : s.m.title;
+    const size = Math.max(5, Math.min(11, span * 0.42, 74 / (0.6 * title.length)));
+    const mid = (s.from + s.to) / 2;
+    return `${shape}<text transform="rotate(${(mid - 90).toFixed(2)})" x="94" y="0" font-size="${size.toFixed(1)}" class="wheel-label">${esc(title)}</text>`;
+  }).join('');
+  return `<svg class="wheel" viewBox="-108 -108 216 216" aria-hidden="true">
+    <circle r="105" fill="#2a1d1b" stroke="#ffc06a" stroke-width="3"/>
+    <g id="wheel-spin" class="wheel-spin">${parts}</g>
+    <circle r="15" fill="#17100e" stroke="#ffc06a" stroke-width="2.5"/>
+    <path d="M0 -6C-3 -11 -10 -9 -9 -3C-8 1 -3 4 0 7C3 4 8 1 9 -3C10 -9 3 -11 0 -6Z" fill="#ff5f82"/>
+  </svg>`;
+}
+
 function moviePick() {
-  const open = pickPool();
-  if (!open.length) return;
+  const pool = pickPool();
+  if (!pool.length) return;
+  const { segs, groups } = wheelSegments(pool);
+  // Erst die Person (alle gleich wahrscheinlich), dann ein Titel von ihr
+  const group = groups[Math.floor(Math.random() * groups.length)];
+  const winner = group[Math.floor(Math.random() * group.length)];
+  const seg = segs.find((s) => s.m === winner);
   openOverlay(`
     <div class="sheet center">
       <p class="eyebrow">Heute schaut ihr</p>
-      <p class="slot" id="slot"></p>
+      <div class="wheel-wrap"><span class="wheel-pointer" aria-hidden="true"></span>${wheelSvg(segs)}</div>
+      <p class="slot wheel-slot" id="slot" aria-live="polite"></p>
       <p class="muted" id="slot-kind">&nbsp;</p>
       <div class="sheet-actions hidden" id="slot-actions">
         <button class="btn ghost" data-action="movie-pick">Nochmal</button>
@@ -526,19 +571,50 @@ function moviePick() {
       </div>
     </div>`);
   const slot = document.getElementById('slot');
-  const winner = open[Math.floor(Math.random() * open.length)];
+  const wheel = document.getElementById('wheel-spin');
+  // Landet irgendwo im Feld des Gewinners, nicht immer genau in der Mitte
+  const span = seg.to - seg.from;
+  const target = seg.from + span * (0.2 + Math.random() * 0.6);
+  const turns = 360 * (5 + Math.floor(Math.random() * 2));
+  const end = turns + (360 - target);
+  const under = (rot) => {
+    const at = ((360 - (rot % 360)) % 360 + 360) % 360;
+    return (segs.find((s) => at >= s.from && at < s.to) || seg).m;
+  };
+  let done = false;
   const finish = () => {
-    // Fenster schon wieder zu oder neu gewürfelt: nichts mehr zu tun
-    if (!slot.isConnected) return;
+    // Fenster schon wieder zu oder neu gedreht: nichts mehr zu tun
+    if (done || !slot.isConnected) return;
+    done = true;
     slot.textContent = winner.title;
     slot.classList.add('landed');
     document.getElementById('slot-kind').textContent = `${winner.kind} · von ${winner.by}`;
     document.getElementById('slot-actions').classList.remove('hidden');
   };
-  if (reducedMotion() || open.length === 1) return finish();
-  let i = 0;
-  const timer = setInterval(() => { slot.textContent = open[i++ % open.length].title; }, 80);
-  setTimeout(() => { clearInterval(timer); finish(); }, 1300);
+  if (reducedMotion() || pool.length === 1) {
+    wheel.style.transform = `rotate(${end}deg)`;
+    return finish();
+  }
+  // Unter dem Rad steht immer der Titel, der gerade am Zeiger vorbeizieht
+  const watch = () => {
+    if (done || !slot.isConnected) return;
+    const m = new DOMMatrix(getComputedStyle(wheel).transform);
+    slot.textContent = under((Math.atan2(m.b, m.a) * 180) / Math.PI).title;
+    requestAnimationFrame(watch);
+  };
+  // Startlage einmal messen lassen, dann losdrehen
+  wheel.getBoundingClientRect();
+  wheel.classList.add('spinning');
+  wheel.style.transform = `rotate(${end}deg)`;
+  requestAnimationFrame(watch);
+  wheel.addEventListener('transitionend', finish, { once: true });
+  // Falls die Animation hängt (z. B. App im Hintergrund): Rad direkt aufs Ergebnis stellen
+  setTimeout(() => {
+    if (done || !slot.isConnected) return;
+    wheel.classList.remove('spinning');
+    wheel.style.transform = `rotate(${end}deg)`;
+    finish();
+  }, 5200);
 }
 
 // ---------- Bucket Lists ----------
