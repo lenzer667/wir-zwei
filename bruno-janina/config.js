@@ -7,7 +7,7 @@ const APP = {
   root: '../',
   couple: {
     people: ['Bruno', 'Janina'], // erst er (grün), dann sie (rot)
-    start: [2026, 1, 1],         // PLATZHALTER: echtes Datum fehlt noch
+    start: [2025, 11, 13],       // Jahr, Monat, Tag
   },
   admin: 'Timm',             // Wünsche für die App erledigt Timm in seiner eigenen App
   autumnPicture: false,
