@@ -418,6 +418,10 @@ function viewMovies() {
       <button class="${UI.movieFilter === 'open' ? 'on' : ''}" data-action="movie-filter" data-to="open">Offen (${open.length})</button>
       <button class="${UI.movieFilter === 'seen' ? 'on' : ''}" data-action="movie-filter" data-to="seen">Gesehen (${seen.length})</button>
     </div>
+    ${list.length ? `<p class="added-by" aria-label="Hinzugefügt von">${COUPLE.people.map((p) => {
+      const n = list.filter((m) => m.by === p).length;
+      return `<span><span class="dot ${ownerClass(p)}"></span>${esc(p)}: ${n}</span>`;
+    }).join('')}</p>` : ''}
 
     ${list.length ? `<ul class="list">${sortSeen(list).map((m) => `
       <li class="item ${m.watched ? 'done' : ''} ${m.id === fav ? 'fav' : ''}">
